@@ -1,5 +1,24 @@
 # Change Log
 
+## 1.33.0
+* Add a setting to sending scanned codes to a custom URL in background
+* Add a setting to automatically put contents into clipboard
+* Add an explicit button to copy WiFi password into clipboard
+* Update Indonesian translation
+
+## 1.32.1
+* Alternatively remove region of interest by dragging handle to a screen corner
+* Restrict region of interest to screen space
+* Remove extra action item to create barcode
+
+## 1.32.0
+* Add bulk mode
+* Remember region of interest permanently
+* Export generated barcode as SVG
+* Run detection on images in background
+* Remove a scan from result view
+* Update Indonesian translation
+
 ## 1.31.0
 * Stop detection while region of interest is modified
 * Fix resetting region of interest

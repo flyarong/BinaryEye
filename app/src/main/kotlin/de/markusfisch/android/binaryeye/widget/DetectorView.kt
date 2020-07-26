@@ -15,15 +15,18 @@ import de.markusfisch.android.binaryeye.graphics.Dots
 import de.markusfisch.android.binaryeye.graphics.getBitmapFromDrawable
 import de.markusfisch.android.binaryeye.graphics.getDashedBorderPaint
 import kotlin.math.abs
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
 class DetectorView : View {
+	val currentOrientation = resources.configuration.orientation
 	val roi = Rect()
 
 	var onRoiChange: (() -> Unit)? = null
 	var onRoiChanged: (() -> Unit)? = null
 
+	private val orientation = resources.configuration.orientation
 	private val dots = Dots(context)
 	private val invalidateRunnable: Runnable = Runnable {
 		marks = null
@@ -35,8 +38,8 @@ class DetectorView : View {
 	)
 	private val handleXRadius = handleBitmap.width / 2
 	private val handleYRadius = handleBitmap.height / 2
-	private val handleHome = Point()
 	private val handlePos = Point(-1, -1)
+	private val handleHome = Point()
 	private val center = Point()
 	private val touchDown = Point()
 	private val distToFull: Int
@@ -46,9 +49,11 @@ class DetectorView : View {
 	private val padding: Int
 
 	private var marks: List<Point>? = null
-	private var orientation = resources.configuration.orientation
 	private var handleGrabbed = false
-	private var handleMoved = false
+	private var handleActive = false
+	private var minY = 0
+	private var maxY = 0
+	private var minDist = 0
 	private var shadeColor = 0
 
 	init {
@@ -68,6 +73,23 @@ class DetectorView : View {
 	constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) :
 			super(context, attrs, defStyleAttr)
 
+	fun setCropHandlePos(x: Int, y: Int, orientation: Int) {
+		if (orientation == currentOrientation) {
+			handlePos.set(x, y)
+		} else {
+			handlePos.set(y, x)
+		}
+		if (x > -1) {
+			handleActive = true
+		}
+	}
+
+	fun getCropHandlePos() = if (handleActive) {
+		handlePos
+	} else {
+		Point(-1, -1)
+	}
+
 	fun mark(points: List<Point>) {
 		marks = points
 		invalidate()
@@ -76,27 +98,23 @@ class DetectorView : View {
 	}
 
 	override fun onSaveInstanceState(): Parcelable? {
-		if (!handleMoved) {
+		if (!handleActive) {
 			return super.onSaveInstanceState()
 		}
 		return SavedState(super.onSaveInstanceState()).apply {
-			savedHandlePos.set(handlePos)
-			savedOrientation = orientation
+			savedHandlePos.set(getCropHandlePos())
+			savedOrientation = currentOrientation
 		}
 	}
 
 	override fun onRestoreInstanceState(state: Parcelable) {
 		super.onRestoreInstanceState(
 			if (state is SavedState) {
-				if (state.savedOrientation == orientation) {
-					handlePos.set(state.savedHandlePos)
-				} else {
-					handlePos.set(
-						state.savedHandlePos.y,
-						state.savedHandlePos.x
-					)
-				}
-				handleMoved = true
+				setCropHandlePos(
+					state.savedHandlePos.x,
+					state.savedHandlePos.y,
+					state.savedOrientation
+				)
 				state.superState
 			} else {
 				state
@@ -127,8 +145,9 @@ class DetectorView : View {
 				if (handleGrabbed) {
 					handlePos.set(x, y)
 					if (distSq(handlePos, touchDown) > minMoveThresholdSq) {
-						handleMoved = true
+						handleActive = true
 					}
+					updateClipRect()
 					invalidate()
 					true
 				} else {
@@ -144,16 +163,18 @@ class DetectorView : View {
 			}
 			MotionEvent.ACTION_UP -> {
 				if (handleGrabbed) {
-					if (!handleMoved) {
+					if (!handleActive) {
+						val mn = min(center.x, center.y) * .8f
 						handlePos.set(
-							(center.x * 1.5f).roundToInt(),
-							(center.y * 1.25f).roundToInt()
+							(center.x + mn).roundToInt(),
+							(center.y + mn).roundToInt()
 						)
-						handleMoved = true
+						handleActive = true
 						invalidate()
 					} else {
 						snap(x, y)
 					}
+					updateClipRect()
 					onRoiChanged?.invoke()
 					handleGrabbed = false
 				}
@@ -164,14 +185,28 @@ class DetectorView : View {
 	}
 
 	private fun snap(x: Int, y: Int) {
-		if (abs(x - center.x) < distToFull ||
-			abs(y - center.y) < distToFull
+		val cx = clampX(x)
+		val cy = clampY(y)
+		val dx = abs(cx - center.x)
+		val dy = abs(cy - center.y)
+		// check if handle is close to the vertical or horizontal center line
+		if (dx < distToFull ||
+			dy < distToFull ||
+			// check if handle is close to a screen corner
+			(
+				(abs(cy - minY) < distToFull || abs(maxY - cy) < distToFull) &&
+				abs(dx - center.x) < distToFull
+			)
 		) {
-			handlePos.set(handleHome)
-			handleMoved = false
-			roi.set(0, 0, 0, 0)
+			reset()
 			invalidate()
 		}
+	}
+
+	private fun reset() {
+		handlePos.set(handleHome)
+		handleActive = false
+		roi.set(0, 0, 0, 0)
 	}
 
 	override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
@@ -182,18 +217,22 @@ class DetectorView : View {
 			left + (width / 2),
 			top + (height / 2)
 		)
+		minY = padding * 2
+		maxY = height - minY
 		handleHome.set(
 			width - handleXRadius - paddingRight - padding,
 			height - handleYRadius - paddingBottom - fabHeight
 		)
-		if (handlePos.x < 0) {
-			handlePos.set(handleHome)
+		if (handleActive) {
+			updateClipRect()
+		} else {
+			reset()
 		}
 	}
 
 	override fun onDraw(canvas: Canvas) {
 		canvas.drawColor(0, PorterDuff.Mode.CLEAR)
-		if (handleMoved) {
+		if (handleActive) {
 			drawClip(canvas)
 		}
 		marks?.let {
@@ -210,7 +249,6 @@ class DetectorView : View {
 	}
 
 	private fun drawClip(canvas: Canvas) {
-		val minDist = updateClipRect()
 		if (minDist < 1) {
 			return
 		}
@@ -235,13 +273,14 @@ class DetectorView : View {
 		}
 	}
 
-	private fun updateClipRect(): Int {
+	private fun updateClipRect() {
+		clampHandlePos()
 		val dx = abs(handlePos.x - center.x)
 		val dy = abs(handlePos.y - center.y)
-		val d = min(dx, dy)
+		minDist = min(dx, dy)
 		shadeColor = (min(
 			1f,
-			d.toFloat() / distToFull.toFloat()
+			minDist.toFloat() / distToFull.toFloat()
 		) * 128f).toInt() shl 24
 		roi.set(
 			center.x - dx,
@@ -249,8 +288,16 @@ class DetectorView : View {
 			center.x + dx,
 			center.y + dy
 		)
-		return d
 	}
+
+	private fun clampHandlePos() {
+		handlePos.x = clampX(handlePos.x)
+		handlePos.y = clampY(handlePos.y)
+	}
+
+	private fun clampX(x: Int) = min(center.x * 2, max(0, x))
+
+	private fun clampY(y: Int) = min(maxY, max(minY, y))
 
 	internal class SavedState : BaseSavedState {
 		val savedHandlePos = Point()

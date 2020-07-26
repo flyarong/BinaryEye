@@ -8,7 +8,6 @@
 	<string name="binary_data">(data biner)</string>
 	<plurals name="barcode_info">
 		<item quantity="other">%1$s, %2$d karakter</item>
-
 	</plurals>
 	<string name="error_correction_level">Level koreksi kesalahan</string>
 	<string name="issue_number">Nomor pemindaian</string>
@@ -22,6 +21,7 @@
 	<string name="share">Bagikan</string>
 	<string name="copy_to_clipboard">Salin ke papan klip</string>
 	<string name="copied_to_clipboard">Simpan ke papan klip</string>
+	<string name="copy_password">Copy password into clipboard</string>
 	<string name="copied_password_to_clipboard">Sandi disalin ke papan klip</string>
 	<string name="open_url">Buka url</string>
 	<string name="cannot_resolve_action">Tidak ada aplikasi yang bisa membukanya</string>
@@ -36,6 +36,7 @@
 	<string name="view_barcode">Lihat barcode</string>
 	<string name="info">Info</string>
 	<string name="switch_camera">Ganti kamera</string>
+	<string name="bulk_mode">Pindai tanpa henti</string>
 	<string name="history">Riwayat</string>
 	<string name="preferences">Preferensi</string>
 	<string name="show_crop_handle">Tampilkan pembatas pemotongan</string>
@@ -46,9 +47,11 @@
 	<string name="use_history">Simpan riwayat pemindaian</string>
 	<string name="ignore_consecutive_duplicates">Jangan simpan duplikat berturutan</string>
 	<string name="open_immediately">Lewati inspeksi dan segera buka konten</string>
+	<string name="copy_immediately">Automatically copy contents into clipboard</string>
 	<string name="show_meta_data">Tampilkan metadata</string>
 	<string name="show_hex_dump">Tampilkan hex dump</string>
 	<string name="open_with_url">Buka data tak dikenal dengan URL</string>
+	<string name="send_scan_url">Send every scan to URL</string>
 	<string name="really_remove_scan">Yakin menghapus pemindaian?</string>
 	<string name="really_remove_all_scans">Yakin menghapus semua pemindaian?</string>
 	<string name="really_remove_selected_scans">Yakin menghapus semua pemindaian?</string>
@@ -83,6 +86,8 @@
 	<string name="search_web">Cari secara daring</string>
 	<string name="search_scan">Cari pindaian</string>
 	<string name="export_to_file">Ekspor ke berkas</string>
+	<string name="export_png">Ekspor sebagai PNG</string>
+	<string name="export_svg">Ekspor sebagai SVG</string>
 	<string name="export_as">Ekspor sebagai?</string>
 	<string name="export_csv_comma">CSV dengan koma</string>
 	<string name="export_csv_semicolon">CSV dengan titik koma</string>

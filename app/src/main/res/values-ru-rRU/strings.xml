@@ -7,9 +7,7 @@
 	<string name="content">Текст</string>
 	<string name="binary_data">(двоичные данные)</string>
 	<plurals name="barcode_info">
-		<item quantity="zero">%2$d символов, %1$s</item>
 		<item quantity="one">%2$d символ, %1$s</item>
-		<item quantity="two">%2$d символа, %1$s</item>
 		<item quantity="few">%2$d символа, %1$s</item>
 		<item quantity="many">%2$d символов, %1$s</item>
 		<item quantity="other">%2$d символов, %1$s</item>
@@ -26,6 +24,7 @@
 	<string name="share">Поделиться</string>
 	<string name="copy_to_clipboard">Скопировать в буфер обмена</string>
 	<string name="copied_to_clipboard">Скопирован в буфер обмена</string>
+	<string name="copy_password">Copy password into clipboard</string>
 	<string name="copied_password_to_clipboard">Пароль скопирован в буфер обмена</string>
 	<string name="open_url">Открыть URL</string>
 	<string name="cannot_resolve_action">Не найдено приложение для этого действия</string>
@@ -40,6 +39,7 @@
 	<string name="view_barcode">Просмотр штрих-кода</string>
 	<string name="info">Информация</string>
 	<string name="switch_camera">Переключить камеру</string>
+	<string name="bulk_mode">Scan continuously</string>
 	<string name="history">История</string>
 	<string name="preferences">Настройки</string>
 	<string name="show_crop_handle">Show cropping limiter</string>
@@ -50,9 +50,11 @@
 	<string name="use_history">Сохранять историю сканирования</string>
 	<string name="ignore_consecutive_duplicates">Не сохранять последовательные дубликаты</string>
 	<string name="open_immediately">Пропускать проверку и сразу открыть содержимое</string>
+	<string name="copy_immediately">Automatically copy contents into clipboard</string>
 	<string name="show_meta_data">Показывать метаданные</string>
 	<string name="show_hex_dump">Показать шестнадцатеричный дамп</string>
 	<string name="open_with_url">Открыть неизвестные данные с помощью URL</string>
+	<string name="send_scan_url">Send every scan to URL</string>
 	<string name="really_remove_scan">Действительно удалить сканирование?</string>
 	<string name="really_remove_all_scans">Действительно удалить все сканирования?</string>
 	<string name="really_remove_selected_scans">Really remove selected scans?</string>
@@ -87,6 +89,8 @@
 	<string name="search_web">Искать в сети</string>
 	<string name="search_scan">Поиск сканирования</string>
 	<string name="export_to_file">Экспортировать в файл</string>
+	<string name="export_png">Export as PNG</string>
+	<string name="export_svg">Export as SVG</string>
 	<string name="export_as">Формат экспортируемого файла</string>
 	<string name="export_csv_comma">CSV (разделитель - запятая)</string>
 	<string name="export_csv_semicolon">CSV (разделитель - точка с запятой)</string>

@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="open_url">Otwórz url</string>
 	<string name="content">Zawartość</string>
@@ -15,6 +14,8 @@
 	<string name="history">Historia</string>
 	<string name="format">Format</string>
 	<string name="export_to_file">Eksportuj do pliku</string>
+	<string name="export_png">Export as PNG</string>
+	<string name="export_svg">Export as SVG</string>
 	<string name="file_name">Nazwa pliku</string>
 	<string name="export_json">Eksportuj jako JSON</string>
 	<string name="pick_search_engine">Wybierz wyszukiwarkę</string>
@@ -54,6 +55,7 @@
 	<string name="show_hex_dump">Pokazuj zrzut szesnastkowy</string>
 	<string name="show_meta_data">Pokazuj metadane</string>
 	<string name="switch_camera">Przełącz aparat</string>
+	<string name="bulk_mode">Scan continuously</string>
 	<string name="toggle_flash">Przełącz lampę błyskową</string>
 	<string name="wifi_added">Wi-Fi dodane</string>
 	<string name="zoom_by_swiping">Przybliżaj kamerę, przesuwając w górę/dół</string>
@@ -68,12 +70,15 @@
 	<string name="use_history">Zapisuj historię skanowania</string>
 	<string name="vibrate">Wibruj po wykryciu</string>
 	<string name="open_immediately">Pomiń kontrolę i natychmiast otwórz zawartość</string>
+	<string name="copy_immediately">Automatically copy contents into clipboard</string>
 	<string name="show_crop_handle">Pokazuj ogranicznik przycinania</string>
 	<string name="search_web">Szukaj w sieci</string>
 	<string name="search_scan">Szukaj skanu</string>
 	<string name="export_database">Eksportuj do bazy danych SQLite</string>
 	<string name="ignore_consecutive_duplicates">Nie zapisuj kolejnych duplikatów</string>
 	<string name="open_with_url">Otwieraj nieznane dane za pomocą adresu URL</string>
+	<string name="send_scan_url">Send every scan to URL</string>
+	<string name="copy_password">Copy password into clipboard</string>
 	<string name="copied_password_to_clipboard">Hasło skopiowane do schowka</string>
 	<string name="pdf417_extra_metadata">Metadane PDF417</string>
 	<string name="suggested_price">Sugerowana cena</string>

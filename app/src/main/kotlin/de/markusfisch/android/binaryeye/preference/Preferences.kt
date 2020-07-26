@@ -7,6 +7,21 @@ import android.preference.PreferenceManager
 class Preferences {
 	lateinit var preferences: SharedPreferences
 
+	var cropHandleX = -1
+		set(value) {
+			apply(CROP_HANDLE_X, value)
+			field = value
+		}
+	var cropHandleY = -1
+		set(value) {
+			apply(CROP_HANDLE_Y, value)
+			field = value
+		}
+	var cropHandleOrientation = 0
+		set(value) {
+			apply(CROP_HANDLE_ORIENTATION, value)
+			field = value
+		}
 	var showCropHandle = true
 		set(value) {
 			apply(SHOW_CROP_HANDLE, value)
@@ -46,6 +61,11 @@ class Preferences {
 			apply(IGNORE_CONSECUTIVE_DUPLICATES, value)
 			field = value
 		}
+	var copyImmediately = false
+		set(value) {
+			apply(COPY_IMMEDIATELY, value)
+			field = value
+		}
 	var openImmediately = false
 		set(value) {
 			apply(OPEN_IMMEDIATELY, value)
@@ -64,6 +84,11 @@ class Preferences {
 	var openWithUrl: String = ""
 		set(value) {
 			apply(OPEN_WITH_URL, value)
+			field = value
+		}
+	var sendScanUrl: String = ""
+		set(value) {
+			apply(POST_SCAN_URL, value)
 			field = value
 		}
 	var indexOfLastSelectedFormat: Int = 0
@@ -85,6 +110,12 @@ class Preferences {
 	}
 
 	fun update() {
+		cropHandleX = preferences.getInt(CROP_HANDLE_X, cropHandleX)
+		cropHandleY = preferences.getInt(CROP_HANDLE_Y, cropHandleY)
+		cropHandleOrientation = preferences.getInt(
+			CROP_HANDLE_ORIENTATION,
+			cropHandleOrientation
+		)
 		showCropHandle = preferences.getBoolean(SHOW_CROP_HANDLE, showCropHandle)
 		zoomBySwiping = preferences.getBoolean(ZOOM_BY_SWIPING, zoomBySwiping)
 		autoRotate = preferences.getBoolean(AUTO_ROTATE, autoRotate)
@@ -95,6 +126,10 @@ class Preferences {
 			IGNORE_CONSECUTIVE_DUPLICATES,
 			ignoreConsecutiveDuplicates
 		)
+		copyImmediately = preferences.getBoolean(
+			COPY_IMMEDIATELY,
+			copyImmediately
+		)
 		openImmediately = preferences.getBoolean(
 			OPEN_IMMEDIATELY,
 			openImmediately
@@ -103,6 +138,9 @@ class Preferences {
 		showHexDump = preferences.getBoolean(SHOW_HEX_DUMP, showHexDump)
 		preferences.getString(OPEN_WITH_URL, openWithUrl)?.also {
 			openWithUrl = it
+		}
+		preferences.getString(POST_SCAN_URL, sendScanUrl)?.also {
+			sendScanUrl = it
 		}
 		indexOfLastSelectedFormat = preferences.getInt(
 			INDEX_OF_LAST_SELECTED_FORMAT,
@@ -131,6 +169,9 @@ class Preferences {
 	}
 
 	companion object {
+		const val CROP_HANDLE_X = "crop_handle_x"
+		const val CROP_HANDLE_Y = "crop_handle_y"
+		const val CROP_HANDLE_ORIENTATION = "crop_handle_orientation"
 		const val SHOW_CROP_HANDLE = "show_crop_handle"
 		const val ZOOM_BY_SWIPING = "zoom_by_swiping"
 		const val AUTO_ROTATE = "auto_rotate"
@@ -139,9 +180,11 @@ class Preferences {
 		const val USE_HISTORY = "use_history"
 		const val IGNORE_CONSECUTIVE_DUPLICATES = "ignore_consecutive_duplicates"
 		const val OPEN_IMMEDIATELY = "open_immediately"
+		const val COPY_IMMEDIATELY = "copy_immediately"
 		const val SHOW_HEX_DUMP = "show_hex_dump"
 		const val SHOW_META_DATA = "show_meta_data"
 		const val OPEN_WITH_URL = "open_with_url"
+		const val POST_SCAN_URL = "post_scan_url"
 		const val INDEX_OF_LAST_SELECTED_FORMAT = "index_of_last_selected_format"
 		const val FORCE_COMPAT = "force_compat"
 	}

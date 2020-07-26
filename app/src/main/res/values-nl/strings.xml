@@ -22,6 +22,7 @@
 	<string name="share">Delen</string>
 	<string name="copy_to_clipboard">Kopiëren naar klembord</string>
 	<string name="copied_to_clipboard">Kopieer de inhoud naar het klembord</string>
+	<string name="copy_password">Copy password into clipboard</string>
 	<string name="copied_password_to_clipboard">Password copied to clipboard</string>
 	<string name="open_url">URL openen</string>
 	<string name="cannot_resolve_action">Er is geen app aangetroffen die dit kan openen</string>
@@ -36,6 +37,7 @@
 	<string name="view_barcode">Barcode bekijken</string>
 	<string name="info">Informatie</string>
 	<string name="switch_camera">Camera wisselen</string>
+	<string name="bulk_mode">Scan continuously</string>
 	<string name="history">Geschiedenis</string>
 	<string name="preferences">Voorkeuren</string>
 	<string name="show_crop_handle">Show cropping limiter</string>
@@ -46,6 +48,7 @@
 	<string name="use_history">Scan-geschiedenis behouden</string>
 	<string name="ignore_consecutive_duplicates">Do not save consecutive duplicates</string>
 	<string name="open_immediately">Skip inspection and open contents immediately</string>
+	<string name="copy_immediately">Automatically copy contents into clipboard</string>
 	<string name="show_meta_data">Show metadata</string>
 	<string name="show_hex_dump">Show hex dump</string>
 	<string name="really_remove_scan">Scan echt verwijderen?</string>
@@ -79,6 +82,8 @@
 	<string name="search_web">Het net doorzoeken</string>
 	<string name="search_scan">Search scan</string>
 	<string name="export_to_file">Naar bestand exporteren</string>
+	<string name="export_png">Export as PNG</string>
+	<string name="export_svg">Export as SVG</string>
 	<string name="export_as">Export as?</string>
 	<string name="export_csv_comma">CSV with commas</string>
 	<string name="export_csv_semicolon">CSV with semicolons</string>
@@ -86,6 +91,7 @@
 	<string name="export_database">Export SQLite database</string>
 	<string name="error_saving_file">Kon bestand niet opslaan</string>
 	<string name="open_with_url">Niet herkende data met URL openen</string>
+	<string name="send_scan_url">Send every scan to URL</string>
 	<string name="pick_list_separator">Hoe de lijstonderdelen te separeren?</string>
 	<string name="saved_in_downloads">In downloads opgeslagen</string>
 	<string name="vevent_failed">Kon niet aan kalender toevoegen</string>

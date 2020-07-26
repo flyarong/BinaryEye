@@ -22,6 +22,7 @@
 	<string name="share">Condividi</string>
 	<string name="copy_to_clipboard">Copia negli appunti</string>
 	<string name="copied_to_clipboard">Metti negli appunti</string>
+	<string name="copy_password">Copy password into clipboard</string>
 	<string name="copied_password_to_clipboard">Password copiata negli appunti</string>
 	<string name="open_url">Apri URL</string>
 	<string name="cannot_resolve_action">Nessuna app può aprirlo</string>
@@ -36,6 +37,7 @@
 	<string name="view_barcode">Vedi codice a barre</string>
 	<string name="info">Info</string>
 	<string name="switch_camera">Cambia fotocamera</string>
+	<string name="bulk_mode">Scan continuously</string>
 	<string name="history">Cronologia</string>
 	<string name="preferences">Preferenze</string>
 	<string name="show_crop_handle">Show cropping limiter</string>
@@ -46,9 +48,11 @@
 	<string name="use_history">Salva cronologia delle scansioni</string>
 	<string name="ignore_consecutive_duplicates">Non salvare doppi consecutivi</string>
 	<string name="open_immediately">Salta l\'analisi e apri i contenuti direttamente</string>
+	<string name="copy_immediately">Automatically copy contents into clipboard</string>
 	<string name="show_meta_data">Mostra metadati</string>
 	<string name="show_hex_dump">Mostra dump esadecimale</string>
 	<string name="open_with_url">Apri dati sconosciuti con URL</string>
+	<string name="send_scan_url">Send every scan to URL</string>
 	<string name="really_remove_scan">Vuoi veramente rimuovere la scansione?</string>
 	<string name="really_remove_all_scans">Vuoi veramente rimuovere tutte le scansioni?</string>
 	<string name="really_remove_selected_scans">Really remove selected scans?</string>
@@ -83,6 +87,8 @@
 	<string name="search_web">Cerca nel web</string>
 	<string name="search_scan">Cerca scansione</string>
 	<string name="export_to_file">Esporta su file</string>
+	<string name="export_png">Export as PNG</string>
+	<string name="export_svg">Export as SVG</string>
 	<string name="export_as">Esportare come?</string>
 	<string name="export_csv_comma">CSV con virgole</string>
 	<string name="export_csv_semicolon">CSV con punti e virgola</string>

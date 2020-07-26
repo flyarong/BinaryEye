@@ -31,13 +31,14 @@ class DecodeFragment : Fragment() {
 	private lateinit var format: String
 	private lateinit var fab: FloatingActionButton
 
-	private var action = ActionRegistry.DEFAULT_ACTION
-	private var isBinary = false
+	private val parentJob = Job()
+	private val scope: CoroutineScope = CoroutineScope(Dispatchers.Main + parentJob)
 	private val content: String
 		get() = contentView.text.toString()
 
-	private val parentJob = Job()
-	private val scope: CoroutineScope = CoroutineScope(Dispatchers.Main + parentJob)
+	private var action = ActionRegistry.DEFAULT_ACTION
+	private var isBinary = false
+	private var id = 0L
 
 	override fun onCreate(state: Bundle?) {
 		super.onCreate(state)
@@ -59,6 +60,7 @@ class DecodeFragment : Fragment() {
 
 		val scan = arguments?.getParcelable(SCAN) as Scan?
 			?: throw IllegalArgumentException("DecodeFragment needs a Scan")
+		id = scan.id
 
 		val inputContent = scan.content
 		isBinary = hasNonPrintableCharacters(
@@ -113,15 +115,6 @@ class DecodeFragment : Fragment() {
 		hexView = view.findViewById(R.id.hex)
 
 		updateViewsAndAction(raw)
-		if (action is WifiAction) {
-			val password = (action as WifiAction).password
-			if (password != null) {
-				activity?.apply {
-					copyToClipboard(password)
-					toast(R.string.copied_password_to_clipboard)
-				}
-			}
-		}
 
 		if (prefs.showMetaData) {
 			fillMetaView(metaView, scan)
@@ -131,6 +124,11 @@ class DecodeFragment : Fragment() {
 		(view.findViewById(R.id.scroll_view) as View).setPaddingFromWindowInsets()
 
 		return view
+	}
+
+	override fun onDestroyView() {
+		parentJob.cancel()
+		super.onDestroyView()
 	}
 
 	private fun updateViewsAndAction(bytes: ByteArray) {
@@ -160,7 +158,7 @@ class DecodeFragment : Fragment() {
 
 	private fun fillMetaView(tableLayout: TableLayout, scan: Scan) {
 		val ctx = tableLayout.context
-		val spaceBetween = (ctx.resources.displayMetrics.density * 16f).toInt()
+		val spaceBetween = (16f * ctx.resources.displayMetrics.density).toInt()
 		var hasMeta = false
 		sortedMapOf(
 			R.string.error_correction_level to scan.errorCorrectionLevel,
@@ -196,10 +194,20 @@ class DecodeFragment : Fragment() {
 			menu.findItem(R.id.copy_to_clipboard).isVisible = false
 			menu.findItem(R.id.create).isVisible = false
 		}
+		if (id > 0L) {
+			menu.findItem(R.id.remove).isVisible = true
+		}
+		if (action is WifiAction) {
+			menu.findItem(R.id.copy_password).isVisible = true
+		}
 	}
 
 	override fun onOptionsItemSelected(item: MenuItem): Boolean {
 		return when (item.itemId) {
+			R.id.copy_password -> {
+				copyPasswordToClipboard()
+				true
+			}
 			R.id.copy_to_clipboard -> {
 				copyToClipboard(content)
 				true
@@ -215,7 +223,24 @@ class DecodeFragment : Fragment() {
 				)
 				true
 			}
+			R.id.remove -> {
+				db.removeScan(id)
+				backOrFinish()
+				true
+			}
 			else -> super.onOptionsItemSelected(item)
+		}
+	}
+
+	private fun copyPasswordToClipboard() {
+		val ac = action
+		if (ac is WifiAction) {
+			ac.password?.let { password ->
+				activity?.apply {
+					copyToClipboard(password)
+					toast(R.string.copied_password_to_clipboard)
+				}
+			}
 		}
 	}
 
@@ -223,6 +248,15 @@ class DecodeFragment : Fragment() {
 		activity?.apply {
 			copyToClipboard(text)
 			toast(R.string.copied_to_clipboard)
+		}
+	}
+
+	private fun backOrFinish() {
+		val fm = fragmentManager
+		if (fm != null && fm.backStackEntryCount > 0) {
+			fm.popBackStack()
+		} else {
+			activity?.finish()
 		}
 	}
 
@@ -257,11 +291,6 @@ class DecodeFragment : Fragment() {
 			}.toSaveResult()
 			ac.toast(message)
 		}
-	}
-
-	override fun onDestroyView() {
-		parentJob.cancel()
-		super.onDestroyView()
 	}
 
 	companion object {

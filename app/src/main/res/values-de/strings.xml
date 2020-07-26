@@ -22,6 +22,7 @@
 	<string name="share">Teilen</string>
 	<string name="copy_to_clipboard">In die Zwischenablage kopieren</string>
 	<string name="copied_to_clipboard">Inhalt wurde in die Zwischenablage kopiert</string>
+	<string name="copy_password">Passwort in die Zwischenablage kopieren</string>
 	<string name="copied_password_to_clipboard">Passwort wurde in die Zwischenablage kopiert</string>
 	<string name="open_url">URL öffnen</string>
 	<string name="cannot_resolve_action">Keine App kann das öffnen</string>
@@ -36,6 +37,7 @@
 	<string name="view_barcode">Barcode ansehen</string>
 	<string name="info">Info</string>
 	<string name="switch_camera">Kamera wechseln</string>
+	<string name="bulk_mode">Fortlaufend Scannen</string>
 	<string name="history">Gespeicherte Codes</string>
 	<string name="preferences">Einstellungen</string>
 	<string name="show_crop_handle">Bereich verkleinern anzeigen</string>
@@ -46,9 +48,11 @@
 	<string name="use_history">Codes speichern</string>
 	<string name="ignore_consecutive_duplicates">Keine aufeinanderfolgenden Duplikate speichern</string>
 	<string name="open_immediately">Inspektion überspringen und Inhalte sofort öffnen</string>
+	<string name="copy_immediately">Inhalte automatisch in Zwischenablage legen</string>
 	<string name="show_meta_data">Meta Daten anzeigen</string>
 	<string name="show_hex_dump">Hex Dump anzeigen</string>
 	<string name="open_with_url">URL zum Öffnen unbekannter Daten</string>
+	<string name="send_scan_url">URL die für jeden Scan aufgerufen werden soll</string>
 	<string name="really_remove_scan">Code wirklich entfernen?</string>
 	<string name="really_remove_all_scans">Alle Codes entfernen?</string>
 	<string name="really_remove_selected_scans">Alle ausgewählten Codes entfernen?</string>
@@ -83,6 +87,8 @@
 	<string name="search_web">Suche im Internet</string>
 	<string name="search_scan">Code suchen</string>
 	<string name="export_to_file">In Datei exportieren</string>
+	<string name="export_png">Als PNG exportieren</string>
+	<string name="export_svg">Als SVG exportieren</string>
 	<string name="export_as">Exportieren als?</string>
 	<string name="export_csv_comma">CSV mit Kommas</string>
 	<string name="export_csv_semicolon">CSV mit Semikolons</string>

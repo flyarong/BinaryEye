@@ -28,14 +28,13 @@ import de.markusfisch.android.binaryeye.database.Scan
 import de.markusfisch.android.binaryeye.graphics.Mapping
 import de.markusfisch.android.binaryeye.graphics.frameToView
 import de.markusfisch.android.binaryeye.graphics.isPortrait
+import de.markusfisch.android.binaryeye.net.send
 import de.markusfisch.android.binaryeye.rs.Preprocessor
 import de.markusfisch.android.binaryeye.view.setPaddingFromWindowInsets
 import de.markusfisch.android.binaryeye.widget.DetectorView
 import de.markusfisch.android.binaryeye.widget.toast
 import de.markusfisch.android.binaryeye.zxing.Zxing
 import de.markusfisch.android.cameraview.widget.CameraView
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -67,6 +66,8 @@ class CameraActivity : AppCompatActivity() {
 	private var decoding = true
 	private var returnResult = false
 	private var frontFacing = false
+	private var bulkMode = false
+	private var ignoreNext: String? = null
 	private var fallbackBuffer: IntArray? = null
 
 	override fun onRequestPermissionsResult(
@@ -75,7 +76,7 @@ class CameraActivity : AppCompatActivity() {
 		grantResults: IntArray
 	) {
 		when (requestCode) {
-			REQUEST_CAMERA -> if (grantResults.isNotEmpty() &&
+			PERMISSION_CAMERA -> if (grantResults.isNotEmpty() &&
 				grantResults[0] != PackageManager.PERMISSION_GRANTED
 			) {
 				toast(R.string.no_camera_no_fun)
@@ -117,16 +118,7 @@ class CameraActivity : AppCompatActivity() {
 
 		initCameraView()
 		initZoomBar()
-		restoreZoom()
-
-		detectorView.onRoiChange = {
-			decoding = false
-		}
-		detectorView.onRoiChanged = {
-			decoding = true
-			recreatePreprocessor = true
-		}
-		detectorView.setPaddingFromWindowInsets()
+		initDetectorView()
 
 		if (intent?.action == Intent.ACTION_SEND &&
 			intent.type == "text/plain"
@@ -140,6 +132,7 @@ class CameraActivity : AppCompatActivity() {
 		resetPreProcessor()
 		fallbackBuffer = null
 		saveZoom()
+		saveCropHandlePos()
 	}
 
 	override fun onResume() {
@@ -147,7 +140,7 @@ class CameraActivity : AppCompatActivity() {
 		System.gc()
 		zxing.updateHints(prefs.tryHarder)
 		returnResult = "com.google.zxing.client.android.SCAN" == intent.action
-		if (hasCameraPermission(this, REQUEST_CAMERA)) {
+		if (hasCameraPermission(this)) {
 			openCamera()
 		}
 	}
@@ -186,17 +179,29 @@ class CameraActivity : AppCompatActivity() {
 		zoomBar.max = savedState.getInt(ZOOM_MAX)
 		zoomBar.progress = savedState.getInt(ZOOM_LEVEL)
 		frontFacing = savedState.getBoolean(FRONT_FACING)
+		bulkMode = savedState.getBoolean(BULK_MODE)
 	}
 
 	override fun onSaveInstanceState(outState: Bundle) {
 		outState.putInt(ZOOM_MAX, zoomBar.max)
 		outState.putInt(ZOOM_LEVEL, zoomBar.progress)
 		outState.putBoolean(FRONT_FACING, frontFacing)
+		outState.putBoolean(BULK_MODE, bulkMode)
 		super.onSaveInstanceState(outState)
+	}
+
+	override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+		// always give crop handle precedence over other controls
+		// because it can easily overlap and would then be inaccessible
+		if (detectorView.onTouchEvent(ev)) {
+			return true
+		}
+		return super.dispatchTouchEvent(ev)
 	}
 
 	override fun onCreateOptionsMenu(menu: Menu): Boolean {
 		menuInflater.inflate(R.menu.activity_camera, menu)
+		menu.findItem(R.id.bulk_mode).isChecked = bulkMode
 		return true
 	}
 
@@ -224,6 +229,11 @@ class CameraActivity : AppCompatActivity() {
 			}
 			R.id.switch_camera -> {
 				switchCamera()
+				true
+			}
+			R.id.bulk_mode -> {
+				bulkMode = bulkMode xor true
+				item.isChecked = bulkMode
 				true
 			}
 			R.id.preferences -> {
@@ -355,6 +365,7 @@ class CameraActivity : AppCompatActivity() {
 				val frameWidth = cameraView.frameWidth
 				val frameHeight = cameraView.frameHeight
 				val frameOrientation = cameraView.frameOrientation
+				ignoreNext = null
 				decoding = true
 				camera.setPreviewCallback { frameData, _ ->
 					if (decoding) {
@@ -364,8 +375,10 @@ class CameraActivity : AppCompatActivity() {
 							frameHeight,
 							frameOrientation
 						)?.let { result ->
-							postResult(result)
-							decoding = false
+							if (result.text != ignoreNext) {
+								postResult(result)
+								decoding = false
+							}
 						}
 					}
 				}
@@ -395,6 +408,7 @@ class CameraActivity : AppCompatActivity() {
 
 			override fun onStopTrackingTouch(seekBar: SeekBar) {}
 		})
+		restoreZoom()
 	}
 
 	@Suppress("DEPRECATION")
@@ -423,6 +437,33 @@ class CameraActivity : AppCompatActivity() {
 		zoomBar.progress = prefs.preferences.getInt(
 			ZOOM_LEVEL,
 			zoomBar.progress
+		)
+	}
+
+	private fun initDetectorView() {
+		detectorView.onRoiChange = {
+			decoding = false
+		}
+		detectorView.onRoiChanged = {
+			decoding = true
+			recreatePreprocessor = true
+		}
+		detectorView.setPaddingFromWindowInsets()
+		restoreCropHandlePos()
+	}
+
+	private fun saveCropHandlePos() {
+		val pos = detectorView.getCropHandlePos()
+		prefs.cropHandleX = pos.x
+		prefs.cropHandleY = pos.y
+		prefs.cropHandleOrientation = detectorView.currentOrientation
+	}
+
+	private fun restoreCropHandlePos() {
+		detectorView.setCropHandlePos(
+			prefs.cropHandleX,
+			prefs.cropHandleY,
+			prefs.cropHandleOrientation
 		)
 	}
 
@@ -550,14 +591,19 @@ class CameraActivity : AppCompatActivity() {
 		) {
 			null
 		} else {
-			// map ROI in detectorView to cameraView because cameraView may
-			// be larger than the detectorView
+			// map ROI in detectorView to cameraView
 			val previewRect = cameraView.previewRect
+			// previewRect may be larger than the screen (and thus as the
+			// detectorView) in which case its left and/or top coordinate
+			// will be negative which must then be clamped to the
+			// screen/DetectorView
+			val previewLeft = max(0, previewRect.left)
+			val previewTop = max(0, previewRect.top)
 			val previewRoi = Rect(
-				previewRect.left + viewRoi.left,
-				previewRect.top + viewRoi.top,
-				previewRect.left + viewRoi.right,
-				previewRect.top + viewRoi.bottom
+				previewLeft + viewRoi.left,
+				previewTop + viewRoi.top,
+				previewLeft + viewRoi.right,
+				previewTop + viewRoi.bottom
 			)
 			val previewRectWidth = previewRect.width().toFloat()
 			val previewRectHeight = previewRect.height().toFloat()
@@ -599,37 +645,52 @@ class CameraActivity : AppCompatActivity() {
 			showResult(
 				this@CameraActivity,
 				result,
-				returnResult
+				returnResult,
+				bulkMode
 			)
+			if (bulkMode) {
+				ignoreNext = result.text
+				toast(result.text)
+				detectorView.postDelayed({
+					decoding = true
+				}, 500)
+			}
 		}
 	}
 
 	private fun getMapping() = if (rotate) rotatedMapping else nativeMapping
 
 	companion object {
-		private const val REQUEST_CAMERA = 1
 		private const val PICK_FILE_RESULT_CODE = 1
 		private const val ZOOM_MAX = "zoom_max"
 		private const val ZOOM_LEVEL = "zoom_level"
 		private const val FRONT_FACING = "front_facing"
+		private const val BULK_MODE = "bulk_mode"
 	}
 }
 
 fun showResult(
 	activity: Activity,
 	result: Result,
-	isResult: Boolean = false
+	isResult: Boolean = false,
+	bulkMode: Boolean = false
 ) {
-	val scan = Scan(result)
 	if (isResult) {
 		activity.setResult(Activity.RESULT_OK, getReturnIntent(result))
 		activity.finish()
-	} else {
-		if (prefs.useHistory) {
-			GlobalScope.launch {
-				db.insertScan(scan)
-			}
-		}
+		return
+	}
+	if (prefs.copyImmediately) {
+		activity.copyToClipboard(result.text)
+	}
+	val scan = Scan(result)
+	prefs.sendScanUrl?.let {
+		scan.send(it)
+	}
+	if (prefs.useHistory) {
+		scan.id = db.insertScan(scan)
+	}
+	if (!bulkMode) {
 		activity.startActivity(
 			MainActivity.getDecodeIntent(activity, scan)
 		)

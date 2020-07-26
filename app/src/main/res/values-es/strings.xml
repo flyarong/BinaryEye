@@ -22,6 +22,7 @@
 	<string name="share">Compartir</string>
 	<string name="copy_to_clipboard">Copiar al portapapeles</string>
 	<string name="copied_to_clipboard">Copiado al portapapeles</string>
+	<string name="copy_password">Copy password into clipboard</string>
 	<string name="copied_password_to_clipboard">Contraseña copiada al portapapeles</string>
 	<string name="open_url">Abrir URL</string>
 	<string name="cannot_resolve_action">Ninguna aplicación puede abrir esto</string>
@@ -36,6 +37,7 @@
 	<string name="view_barcode">Ver código de barras</string>
 	<string name="info">Información</string>
 	<string name="switch_camera">Cambiar cámara</string>
+	<string name="bulk_mode">Scan continuously</string>
 	<string name="history">Historial</string>
 	<string name="preferences">Configuración</string>
 	<string name="show_crop_handle">Show cropping limiter</string>
@@ -46,9 +48,11 @@
 	<string name="use_history">Guardar historial de escaneados</string>
 	<string name="ignore_consecutive_duplicates">No guardar duplicados consecutivos</string>
 	<string name="open_immediately">Saltar la inspección y abrir el contenido inmediatamente</string>
+	<string name="copy_immediately">Automatically copy contents into clipboard</string>
 	<string name="show_meta_data">Mostrar metadatos</string>
 	<string name="show_hex_dump">Mostrar volcado hexagonal</string>
 	<string name="open_with_url">Abrir datos desconocidos con URL</string>
+	<string name="send_scan_url">Send every scan to URL</string>
 	<string name="really_remove_scan">¿Realmente desea borrar el escaneo seleccionado?</string>
 	<string name="really_remove_all_scans">¿Realmente desea borrar todo lo escaneado?</string>
 	<string name="really_remove_selected_scans">¿Realmente desea borrar los escaneos seleccionados?</string>
@@ -83,6 +87,8 @@
 	<string name="search_web">Buscar en la web</string>
 	<string name="search_scan">Buscar escaneos</string>
 	<string name="export_to_file">Exportar a archivo</string>
+	<string name="export_png">Export as PNG</string>
+	<string name="export_svg">Export as SVG</string>
 	<string name="export_as">¿Dónde desea exportar?</string>
 	<string name="export_csv_comma">CSV con comas</string>
 	<string name="export_csv_semicolon">CSV con punto y coma</string>

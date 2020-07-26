@@ -22,6 +22,7 @@
 	<string name="share">Compartilhar</string>
 	<string name="copy_to_clipboard">Copiar para área de transferência</string>
 	<string name="copied_to_clipboard">Colocar na área de transferência</string>
+	<string name="copy_password">Copy password into clipboard</string>
 	<string name="copied_password_to_clipboard">Password copied to clipboard</string>
 	<string name="open_url">Abrir url</string>
 	<string name="cannot_resolve_action">Nenhuma aplicativo pode abrir isso</string>
@@ -36,6 +37,7 @@
 	<string name="view_barcode">Ver código de barras</string>
 	<string name="info">Informações</string>
 	<string name="switch_camera">Trocar câmera</string>
+	<string name="bulk_mode">Scan continuously</string>
 	<string name="history">Histórico</string>
 	<string name="preferences">Preferências</string>
 	<string name="show_crop_handle">Show cropping limiter</string>
@@ -46,9 +48,11 @@
 	<string name="use_history">Salvar histórico de escaneamento</string>
 	<string name="ignore_consecutive_duplicates">Do not save consecutive duplicates</string>
 	<string name="open_immediately">Skip inspection and open contents immediately</string>
+	<string name="copy_immediately">Automatically copy contents into clipboard</string>
 	<string name="show_meta_data">Show metadata</string>
 	<string name="show_hex_dump">Show hex dump</string>
 	<string name="open_with_url">Abrir dados desconhecidos com URL</string>
+	<string name="send_scan_url">Send every scan to URL</string>
 	<string name="really_remove_scan">Realmente deseja remover o escaneamento?</string>
 	<string name="really_remove_all_scans">Realmente deseja remover todos escaneamentos?</string>
 	<string name="really_remove_selected_scans">Really remove selected scans?</string>
@@ -83,6 +87,8 @@
 	<string name="search_web">Search the web</string>
 	<string name="search_scan">Search scan</string>
 	<string name="export_to_file">Export to file</string>
+	<string name="export_png">Export as PNG</string>
+	<string name="export_svg">Export as SVG</string>
 	<string name="export_as">Export as?</string>
 	<string name="export_csv_comma">CSV with commas</string>
 	<string name="export_csv_semicolon">CSV with semicolons</string>
