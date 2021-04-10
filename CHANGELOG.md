@@ -1,7 +1,61 @@
 # Change Log
 
+## 1.40.0
+* Add a setting to show/hide scanned data when scanning continuously
+* Only show the first 50 characters when scanning continuously
+* Share binary data as hex dump
+* Update Russian language
+
+## 1.39.0
+* Fix adding contacts and calendar entries on Android 11+
+* Add a setting to always start in bulk mode
+* Add Czech translation
+* Update Spanish translation
+* Update Czech translation
+
+## 1.38.0
+* Add a quick settings tile to scan from settings
+* Make custom background requests time out after 5 seconds
+* Add Japanese translation
+* Updated French translation
+
+## 1.37.0
+* Improve formatting date and time in history listing
+* Add haptic and audible feedback for background request errors
+
+## 1.36.0
+* Add a setting to automatically return to scanning screen after copying
+* Add a button to test the background request
+* Show HTTP response for background requests
+* Improve SVG export
+* Automatically continue with an action after granting a permission
+* Update Chinese translation
+* Update French translation
+* Update Indonesian translation
+* Update Turkish translation
+* Update Ukrainian translation
+
+## 1.35.0
+* Put images with transparent pixels on white/black
+* Use cropping limiter when scanning from images too
+* Support setting the error correction level when creating QR Codes
+* Support setting a custom deviating locale
+* Use adaptive icons for shortcut icons
+* Add exporting barcodes as plain text
+* Add Ukrainian translation
+* Add Turkish translation
+* Add Georgian translation
+* Update Indonesian translation
+* Update Russian translation
+* Update Italian translation
+* Update Simplified Chinese translation
+
+## 1.34.0
+* Use Material Design settings with headers
+* Add a setting to choose the message type when forwarding scanned content
+
 ## 1.33.0
-* Add a setting to sending scanned codes to a custom URL in background
+* Add a setting to automatically send the scanned content to a custom URL
 * Add a setting to automatically put contents into clipboard
 * Add an explicit button to copy WiFi password into clipboard
 * Update Indonesian translation

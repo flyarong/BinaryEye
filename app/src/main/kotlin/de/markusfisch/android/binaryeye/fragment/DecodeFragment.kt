@@ -14,8 +14,15 @@ import android.widget.TextView
 import de.markusfisch.android.binaryeye.R
 import de.markusfisch.android.binaryeye.actions.ActionRegistry
 import de.markusfisch.android.binaryeye.actions.wifi.WifiAction
+import de.markusfisch.android.binaryeye.activity.MainActivity
+import de.markusfisch.android.binaryeye.adapter.prettifyFormatName
 import de.markusfisch.android.binaryeye.app.*
+import de.markusfisch.android.binaryeye.content.copyToClipboard
+import de.markusfisch.android.binaryeye.content.shareText
 import de.markusfisch.android.binaryeye.database.Scan
+import de.markusfisch.android.binaryeye.io.askForFileName
+import de.markusfisch.android.binaryeye.io.toSaveResult
+import de.markusfisch.android.binaryeye.io.writeExternalFile
 import de.markusfisch.android.binaryeye.view.setPaddingFromWindowInsets
 import de.markusfisch.android.binaryeye.widget.toast
 import kotlinx.coroutines.CoroutineScope
@@ -36,8 +43,10 @@ class DecodeFragment : Fragment() {
 	private val content: String
 		get() = contentView.text.toString()
 
+	private var closeAutomatically = false
 	private var action = ActionRegistry.DEFAULT_ACTION
 	private var isBinary = false
+	private var raw: ByteArray = ByteArray(0)
 	private var id = 0L
 
 	override fun onCreate(state: Bundle?) {
@@ -58,6 +67,9 @@ class DecodeFragment : Fragment() {
 			false
 		)
 
+		closeAutomatically = prefs.closeAutomatically &&
+				activity?.intent?.hasExtra(MainActivity.DECODED) == true
+
 		val scan = arguments?.getParcelable(SCAN) as Scan?
 			?: throw IllegalArgumentException("DecodeFragment needs a Scan")
 		id = scan.id
@@ -66,7 +78,7 @@ class DecodeFragment : Fragment() {
 		isBinary = hasNonPrintableCharacters(
 			inputContent
 		) or inputContent.isEmpty()
-		val raw = scan.raw ?: inputContent.toByteArray()
+		raw = scan.raw ?: inputContent.toByteArray()
 		format = scan.format
 
 		contentView = view.findViewById(R.id.content)
@@ -126,9 +138,9 @@ class DecodeFragment : Fragment() {
 		return view
 	}
 
-	override fun onDestroyView() {
+	override fun onDestroy() {
+		super.onDestroy()
 		parentJob.cancel()
-		super.onDestroyView()
 	}
 
 	private fun updateViewsAndAction(bytes: ByteArray) {
@@ -139,7 +151,7 @@ class DecodeFragment : Fragment() {
 		formatView.text = resources.getQuantityString(
 			R.plurals.barcode_info,
 			bytes.size,
-			format,
+			prettifyFormatName(format),
 			bytes.size
 		)
 		hexView.text = if (prefs.showHexDump) hexDump(bytes) else ""
@@ -206,14 +218,19 @@ class DecodeFragment : Fragment() {
 		return when (item.itemId) {
 			R.id.copy_password -> {
 				copyPasswordToClipboard()
+				maybeBackOrFinish()
 				true
 			}
 			R.id.copy_to_clipboard -> {
-				copyToClipboard(content)
+				copyToClipboard(textOrHex())
+				maybeBackOrFinish()
 				true
 			}
 			R.id.share -> {
-				context?.also { shareText(it, content) }
+				context?.also {
+					shareText(it, textOrHex())
+					maybeBackOrFinish()
+				}
 				true
 			}
 			R.id.create -> {
@@ -230,6 +247,12 @@ class DecodeFragment : Fragment() {
 			}
 			else -> super.onOptionsItemSelected(item)
 		}
+	}
+
+	private fun textOrHex() = if (isBinary) {
+		raw.toHexString()
+	} else {
+		content
 	}
 
 	private fun copyPasswordToClipboard() {
@@ -251,6 +274,12 @@ class DecodeFragment : Fragment() {
 		}
 	}
 
+	private fun maybeBackOrFinish() {
+		if (closeAutomatically) {
+			backOrFinish()
+		}
+	}
+
 	private fun backOrFinish() {
 		val fm = fragmentManager
 		if (fm != null && fm.backStackEntryCount > 0) {
@@ -265,19 +294,20 @@ class DecodeFragment : Fragment() {
 		if (content.isNotEmpty()) {
 			if (action is WifiAction &&
 				Build.VERSION.SDK_INT < Build.VERSION_CODES.Q &&
-				!hasLocationPermission(ac)
+				!hasLocationPermission(ac) { executeAction(content) }
 			) {
 				return
 			}
 			scope.launch {
 				action.execute(ac, content)
+				maybeBackOrFinish()
 			}
 		}
 	}
 
 	private fun askForFileNameAndSave(raw: ByteArray) {
 		val ac = activity ?: return
-		if (!hasWritePermission(ac)) {
+		if (!hasWritePermission(ac) { askForFileNameAndSave(raw) }) {
 			return
 		}
 		scope.launch(Dispatchers.Main) {
@@ -306,7 +336,7 @@ class DecodeFragment : Fragment() {
 	}
 }
 
-fun hexDump(bytes: ByteArray, charsPerLine: Int = 33): String {
+private fun hexDump(bytes: ByteArray, charsPerLine: Int = 33): String {
 	if (charsPerLine < 4 || bytes.isEmpty()) {
 		return ""
 	}

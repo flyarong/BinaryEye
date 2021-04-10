@@ -2,19 +2,30 @@ package de.markusfisch.android.binaryeye.fragment
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.Context
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.*
 import android.widget.EditText
 import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
 import de.markusfisch.android.binaryeye.R
-import de.markusfisch.android.binaryeye.app.*
+import de.markusfisch.android.binaryeye.app.hasWritePermission
+import de.markusfisch.android.binaryeye.content.copyToClipboard
+import de.markusfisch.android.binaryeye.content.shareFile
+import de.markusfisch.android.binaryeye.content.shareText
+import de.markusfisch.android.binaryeye.io.addSuffixIfNotGiven
+import de.markusfisch.android.binaryeye.io.toSaveResult
+import de.markusfisch.android.binaryeye.io.writeExternalFile
 import de.markusfisch.android.binaryeye.view.doOnApplyWindowInsets
 import de.markusfisch.android.binaryeye.view.setPaddingFromWindowInsets
 import de.markusfisch.android.binaryeye.widget.ConfinedScalingImageView
 import de.markusfisch.android.binaryeye.widget.toast
-import de.markusfisch.android.binaryeye.zxing.Zxing
+import de.markusfisch.android.binaryeye.zxing.encodeAsBitmap
+import de.markusfisch.android.binaryeye.zxing.encodeAsSvg
+import de.markusfisch.android.binaryeye.zxing.encodeAsText
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -26,11 +37,12 @@ import java.util.*
 
 class BarcodeFragment : Fragment() {
 	private enum class FileType {
-		PNG, SVG
+		PNG, SVG, TXT
 	}
 
 	private var barcodeBitmap: Bitmap? = null
 	private var barcodeSvg: String? = null
+	private var barcodeTxt: String? = null
 	private var content: String = ""
 	private var format: BarcodeFormat? = null
 
@@ -56,10 +68,12 @@ class BarcodeFragment : Fragment() {
 		val args = arguments ?: return view
 		val content = args.getString(CONTENT) ?: return view
 		val format = args.getSerializable(FORMAT) as BarcodeFormat? ?: return view
+		val hints = args.getSerializable(HINTS) as EnumMap<EncodeHintType, Any>?
 		val size = args.getInt(SIZE)
 		try {
-			barcodeBitmap = Zxing.encodeAsBitmap(content, format, size, size)
-			barcodeSvg = Zxing.encodeAsSvg(content, format, size, size)
+			barcodeBitmap = encodeAsBitmap(content, format, size, size, hints)
+			barcodeSvg = encodeAsSvg(content, format, hints)
+			barcodeTxt = encodeAsText(content, format, hints)
 		} catch (e: Exception) {
 			var message = e.message
 			if (message == null || message.isEmpty()) {
@@ -84,9 +98,8 @@ class BarcodeFragment : Fragment() {
 		}
 
 		view.findViewById<View>(R.id.share).setOnClickListener {
-			val bitmap = barcodeBitmap
-			bitmap?.let {
-				share(bitmap)
+			pickFileType(context, R.string.share_as) {
+				shareAs(it)
 			}
 		}
 
@@ -104,23 +117,42 @@ class BarcodeFragment : Fragment() {
 
 	override fun onOptionsItemSelected(item: MenuItem): Boolean {
 		return when (item.itemId) {
-			R.id.export_svg -> {
-				askForFileNameAndSave(FileType.SVG)
+			R.id.copy_to_clipboard -> {
+				barcodeTxt?.let {
+					context.copyToClipboard(it)
+					context.toast(R.string.copied_to_clipboard)
+				}
 				true
 			}
-			R.id.export_png -> {
-				askForFileNameAndSave(FileType.PNG)
+			R.id.export_to_file -> {
+				pickFileType(context, R.string.export_as) {
+					askForFileNameAndSave(it)
+				}
 				true
 			}
 			else -> super.onOptionsItemSelected(item)
 		}
 	}
 
+	private fun pickFileType(
+		context: Context,
+		title: Int,
+		action: (FileType) -> Unit
+	) {
+		val fileTypes = FileType.values()
+		AlertDialog.Builder(context)
+			.setTitle(title)
+			.setItems(fileTypes.map { it.name }.toTypedArray()) { _, which ->
+				action(fileTypes[which])
+			}
+			.show()
+	}
+
 	// dialogs do not have a parent view
 	@SuppressLint("InflateParams")
 	private fun askForFileNameAndSave(fileType: FileType) {
 		val ac = activity ?: return
-		if (!hasWritePermission(ac)) {
+		if (!hasWritePermission(ac) { askForFileNameAndSave(fileType) }) {
 			return
 		}
 		val view = ac.layoutInflater.inflate(R.layout.dialog_save_file, null)
@@ -133,15 +165,23 @@ class BarcodeFragment : Fragment() {
 				when (fileType) {
 					FileType.PNG -> saveAs(
 						addSuffixIfNotGiven(fileName, ".png"),
-						"image/png"
+						MIME_PNG
 					) {
 						barcodeBitmap?.saveAsPng(it)
 					}
 					FileType.SVG -> saveAs(
 						addSuffixIfNotGiven(fileName, ".svg"),
-						"image/svg+xmg"
+						MIME_SVG
 					) { outputStream ->
 						barcodeSvg?.let {
+							outputStream.write(it.toByteArray())
+						}
+					}
+					FileType.TXT -> saveAs(
+						addSuffixIfNotGiven(fileName, ".txt"),
+						MIME_TXT
+					) { outputStream ->
+						barcodeTxt?.let {
 							outputStream.write(it.toByteArray())
 						}
 					}
@@ -166,8 +206,16 @@ class BarcodeFragment : Fragment() {
 		}
 	}
 
+	private fun shareAs(fileType: FileType) {
+		when (fileType) {
+			FileType.PNG -> barcodeBitmap?.let { share(it) }
+			FileType.SVG -> barcodeSvg?.let { shareText(context, it, MIME_SVG) }
+			FileType.TXT -> barcodeTxt?.let { shareText(context, it) }
+		}
+	}
+
 	private fun share(bitmap: Bitmap) {
-		GlobalScope.launch {
+		GlobalScope.launch(Dispatchers.IO) {
 			val file = File(
 				context.externalCacheDir,
 				"shared_barcode.png"
@@ -193,16 +241,24 @@ class BarcodeFragment : Fragment() {
 	companion object {
 		private const val CONTENT = "content"
 		private const val FORMAT = "format"
+		private const val HINTS = "hints"
 		private const val SIZE = "size"
+		private const val MIME_PNG = "image/png"
+		private const val MIME_SVG = "image/svg+xmg"
+		private const val MIME_TXT = "text/plain"
 
 		fun newInstance(
 			content: String,
 			format: BarcodeFormat,
-			size: Int
+			size: Int,
+			hints: EnumMap<EncodeHintType, Any>? = null
 		): Fragment {
 			val args = Bundle()
 			args.putString(CONTENT, content)
 			args.putSerializable(FORMAT, format)
+			hints?.let {
+				args.putSerializable(HINTS, it)
+			}
 			args.putInt(SIZE, size)
 			val fragment = BarcodeFragment()
 			fragment.arguments = args

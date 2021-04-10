@@ -2,6 +2,7 @@ package de.markusfisch.android.binaryeye.zxing
 
 import android.graphics.Bitmap
 import com.google.zxing.*
+import com.google.zxing.common.BitMatrix
 import com.google.zxing.common.HybridBinarizer
 import java.util.*
 
@@ -10,7 +11,7 @@ class Zxing(possibleResultPoint: ResultPointCallback? = null) {
 	private val multiFormatReader = MultiFormatReader()
 
 	init {
-		val decodeFormats = EnumSet.noneOf<BarcodeFormat>(
+		val decodeFormats = EnumSet.noneOf(
 			BarcodeFormat::class.java
 		)
 		decodeFormats.addAll(
@@ -118,80 +119,98 @@ class Zxing(possibleResultPoint: ResultPointCallback? = null) {
 			multiFormatReader.reset()
 		}
 	}
+}
 
-	companion object {
-		private const val BLACK = 0xff000000.toInt()
-		private const val WHITE = 0xffffffff.toInt()
+private const val BLACK = 0xff000000.toInt()
+private const val WHITE = 0xffffffff.toInt()
 
-		fun encodeAsBitmap(
-			text: String,
-			format: BarcodeFormat,
-			width: Int,
-			height: Int
-		): Bitmap? {
-			val hints = EnumMap<EncodeHintType, Any>(EncodeHintType::class.java)
-			hints[EncodeHintType.CHARACTER_SET] = "utf-8"
-			val result = MultiFormatWriter().encode(
-				text,
-				format,
-				width,
-				height,
-				hints
-			)
-			val w = result.width
-			val h = result.height
-			val pixels = IntArray(w * h)
-			var offset = 0
-			for (y in 0 until h) {
-				for (x in 0 until w) {
-					pixels[offset + x] = if (result.get(x, y)) {
-						BLACK
-					} else {
-						WHITE
-					}
-				}
-				offset += w
+fun encodeAsBitmap(
+	text: String,
+	format: BarcodeFormat,
+	width: Int,
+	height: Int,
+	hints: EnumMap<EncodeHintType, Any>? = null
+): Bitmap? {
+	val bitMatrix = encode(text, format, hints, width, height)
+	val w = bitMatrix.width
+	val h = bitMatrix.height
+	val pixels = IntArray(w * h)
+	var offset = 0
+	for (y in 0 until h) {
+		for (x in 0 until w) {
+			pixels[offset + x] = if (bitMatrix.get(x, y)) {
+				BLACK
+			} else {
+				WHITE
 			}
-			val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-			bitmap.setPixels(pixels, 0, w, 0, 0, w, h)
-			return bitmap
 		}
+		offset += w
+	}
+	val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+	bitmap.setPixels(pixels, 0, w, 0, 0, w, h)
+	return bitmap
+}
 
-		fun encodeAsSvg(
-			text: String,
-			format: BarcodeFormat,
-			width: Int,
-			height: Int
-		): String {
-			val hints = EnumMap<EncodeHintType, Any>(EncodeHintType::class.java)
-			hints[EncodeHintType.CHARACTER_SET] = "utf-8"
-			val result = MultiFormatWriter().encode(
-				text,
-				format,
-				0,
-				0,
-				hints
-			)
-			val sb = StringBuilder()
-			sb.append("<svg width=\"$width\" height=\"$height\"")
-			sb.append(" viewBox=\"0 0 $width $height\"")
-			sb.append(" xmlns=\"http://www.w3.org/2000/svg\">\n")
-			val w = result.width
-			val h = result.height
-			val xf = width.toFloat() / w
-			val yf = height.toFloat() / h
-			for (y in 0 until h) {
-				for (x in 0 until w) {
-					if (result.get(x, y)) {
-						val ox = x * xf
-						val oy = y * yf
-						sb.append("<rect x=\"$ox\" y=\"$oy\"")
-						sb.append(" width=\"$xf\" height=\"$yf\"/>\n")
-					}
-				}
+fun encodeAsSvg(
+	text: String,
+	format: BarcodeFormat,
+	hints: EnumMap<EncodeHintType, Any>? = null
+): String {
+	val bitMatrix = encode(text, format, hints)
+	val sb = StringBuilder()
+	val w = bitMatrix.width
+	var h = bitMatrix.height
+	val moduleHeight = if (h == 1) w / 2 else 1
+	for (y in 0 until h) {
+		for (x in 0 until w) {
+			if (bitMatrix.get(x, y)) {
+				sb.append(" M${x},${y}h1v${moduleHeight}h-1z")
 			}
-			sb.append("</svg>\n")
-			return sb.toString()
 		}
 	}
+	h *= moduleHeight
+	return """<svg width="$w" height="$h"
+viewBox="0 0 $w $h"
+xmlns="http://www.w3.org/2000/svg">
+<path d="$sb"/>
+</svg>
+"""
+}
+
+fun encodeAsText(
+	text: String,
+	format: BarcodeFormat,
+	hints: EnumMap<EncodeHintType, Any>? = null
+): String {
+	val bitMatrix = encode(text, format, hints)
+	val w = bitMatrix.width
+	val h = bitMatrix.height
+	val sb = StringBuilder()
+	for (y in 0 until h) {
+		for (x in 0 until w) {
+			sb.append(if (bitMatrix.get(x, y)) "█" else " ")
+		}
+		sb.append("\n")
+	}
+	return sb.toString()
+}
+
+private fun encode(
+	text: String,
+	format: BarcodeFormat,
+	encodeHints: EnumMap<EncodeHintType, Any>? = null,
+	width: Int = 0,
+	height: Int = 0
+): BitMatrix {
+	val hints = encodeHints ?: EnumMap<EncodeHintType, Any>(EncodeHintType::class.java)
+	if (!hints.contains(EncodeHintType.CHARACTER_SET)) {
+		hints[EncodeHintType.CHARACTER_SET] = "utf-8"
+	}
+	return MultiFormatWriter().encode(
+		text,
+		format,
+		width,
+		height,
+		hints
+	)
 }

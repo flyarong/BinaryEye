@@ -11,6 +11,10 @@
 		<item quantity="other">%2$d characters, %1$s</item>
 	</plurals>
 	<string name="error_correction_level">Error correction level</string>
+	<string name="error_correction_level_l" formatted="false">Low (~7&#37; correction)</string>
+	<string name="error_correction_level_m" formatted="false">Medium (~15&#37; correction)</string>
+	<string name="error_correction_level_q" formatted="false">Quartile (~25&#37; correction)</string>
+	<string name="error_correction_level_h" formatted="false">High (~30&#37; correction)</string>
 	<string name="issue_number">Issue number</string>
 	<string name="orientation">Orientation</string>
 	<string name="other_meta_data">Metadata</string>
@@ -20,6 +24,7 @@
 	<string name="upc_ean_extension">UPC EAN extension</string>
 	<string name="toggle_flash">Toggle flash</string>
 	<string name="share">Share</string>
+	<string name="share_as">Share as?</string>
 	<string name="copy_to_clipboard">Copy to clipboard</string>
 	<string name="copied_to_clipboard">Copied to clipboard</string>
 	<string name="copy_password">Copy password into clipboard</string>
@@ -38,21 +43,49 @@
 	<string name="info">Info</string>
 	<string name="switch_camera">Switch camera</string>
 	<string name="bulk_mode">Scan continuously</string>
+	<string name="bulk_mode_summary">Always start scanning continuously.</string>
 	<string name="history">History</string>
 	<string name="preferences">Preferences</string>
+	<string name="scan_category">Scan</string>
+	<string name="content_category">Content</string>
+	<string name="locale_category">Language</string>
+	<string name="custom_locale">Custom language</string>
+	<string name="follow_system_settings">Follow system settings</string>
 	<string name="show_crop_handle">Show cropping limiter</string>
-	<string name="zoom_by_swiping">Zoom camera by swiping up/down</string>
-	<string name="auto_rotate">Recognize 1D barcodes vertically</string>
-	<string name="try_harder">Optimize reader for accuracy, not speed</string>
+	<string name="show_crop_handle_summary">Restrict scanning to a customizable region.</string>
+	<string name="zoom_by_swiping">Swipe up/down to zoom</string>
+	<string name="zoom_by_swiping_summary">Swipe up or down in camera screen to control the camera zoom.</string>
+	<string name="auto_rotate">Recognize vertical 1D barcodes</string>
+	<string name="auto_rotate_summary">Automatically rotate the camera frame to recognize vertical 1D barcodes. Depending on the device, this may affect performance.</string>
+	<string name="try_harder">Optimize reader for accuracy</string>
+	<string name="try_harder_summary">Enable this option for very hard to read codes. Will affect performance.</string>
+	<string name="show_toast_in_bulk_mode">Show data in continuous mode</string>
+	<string name="show_toast_in_bulk_mode_summary">Briefly show the scanned data when scanning continuously.</string>
 	<string name="vibrate">Vibrate on detection</string>
+	<string name="vibrate_summary">Enable this if you want your device to vibrate when a code is recognized.</string>
 	<string name="use_history">Save scan history</string>
-	<string name="ignore_consecutive_duplicates">Do not save consecutive duplicates</string>
-	<string name="open_immediately">Skip inspection and open contents immediately</string>
-	<string name="copy_immediately">Automatically copy contents into clipboard</string>
+	<string name="use_history_summary">Save recognized codes on your device.</string>
+	<string name="ignore_consecutive_duplicates">Ignore duplicates</string>
+	<string name="ignore_consecutive_duplicates_summary">Do not save consecutive duplicates in the scan history.</string>
+	<string name="open_immediately">Open immediately</string>
+	<string name="open_immediately_summary">Skip inspection and open contents immediately. May open harmful content if enabled.</string>
+	<string name="copy_immediately">Put into clipboard</string>
+	<string name="copy_immediately_summary">Automatically copy scanned contents into clipboard. Please note that other apps may snoop on your clipboard in the background.</string>
 	<string name="show_meta_data">Show metadata</string>
+	<string name="show_meta_data_summary">Show additional data about the scanned barcode.</string>
 	<string name="show_hex_dump">Show hex dump</string>
+	<string name="show_hex_dump_summary">Show a hex dump of the scanned contents.</string>
+	<string name="close_automatically">Go back after Copy/Share</string>
+	<string name="close_automatically_summary">Automatically return to the scan screen after copying or sharing the read contents.</string>
 	<string name="open_with_url">Open unknown data with URL</string>
+	<string name="send_category">Forwarding</string>
 	<string name="send_scan_url">Send every scan to URL</string>
+	<string name="send_scan_type">Type of request for every scan</string>
+	<string name="send_type_get_add_content">GET and simply add content</string>
+	<string name="send_type_get_query_string">GET with compelete query string</string>
+	<string name="send_type_post_form">POST application/x-www-form-urlencoded</string>
+	<string name="send_type_post_json">POST application/json</string>
+	<string name="test_url">Test URL</string>
 	<string name="really_remove_scan">Really remove scan?</string>
 	<string name="really_remove_all_scans">Really remove all scans?</string>
 	<string name="really_remove_selected_scans">Really remove selected scans?</string>
@@ -87,13 +120,11 @@
 	<string name="search_web">Search the web</string>
 	<string name="search_scan">Search scan</string>
 	<string name="export_to_file">Export to file</string>
-	<string name="export_png">Export as PNG</string>
-	<string name="export_svg">Export as SVG</string>
 	<string name="export_as">Export as?</string>
-	<string name="export_csv_comma">CSV with commas</string>
-	<string name="export_csv_semicolon">CSV with semicolons</string>
-	<string name="export_json">Export as JSON</string>
-	<string name="export_database">Export SQLite database</string>
+	<string name="export_csv_comma">CSV file with commas</string>
+	<string name="export_csv_semicolon">CSV file with semicolons</string>
+	<string name="export_json">JSON file</string>
+	<string name="export_database">SQLite database</string>
 	<string name="saved_in_downloads">Saved in downloads</string>
 	<string name="rotate_image_cw">Rotate image clockwise</string>
 	<string name="pick_file">Pick image file</string>
@@ -101,4 +132,5 @@
 	<string name="shortcut_decode">Scan a barcode</string>
 	<string name="shortcut_encode">Create a barcode</string>
 	<string name="shortcut_preferences">Settings</string>
+	<string name="background_request_failed">Background request failed</string>
 </resources>

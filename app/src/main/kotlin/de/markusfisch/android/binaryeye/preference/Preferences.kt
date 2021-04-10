@@ -46,6 +46,20 @@ class Preferences {
 			commit(TRY_HARDER, value)
 			field = value
 		}
+	var bulkMode = false
+		set(value) {
+			// immediately save this setting because it's only ever read
+			// before the camera is opened
+			commit(BULK_MODE, value)
+			field = value
+		}
+	var showToastInBulkMode = true
+		set(value) {
+			// immediately save this setting because it's only ever read
+			// before the camera is opened
+			commit(SHOW_TOAST_IN_BULK_MODE, value)
+			field = value
+		}
 	var vibrate = true
 		set(value) {
 			apply(VIBRATE, value)
@@ -81,6 +95,11 @@ class Preferences {
 			apply(SHOW_HEX_DUMP, value)
 			field = value
 		}
+	var closeAutomatically = false
+		set(value) {
+			apply(CLOSE_AUTOMATICALLY, value)
+			field = value
+		}
 	var openWithUrl: String = ""
 		set(value) {
 			apply(OPEN_WITH_URL, value)
@@ -88,7 +107,17 @@ class Preferences {
 		}
 	var sendScanUrl: String = ""
 		set(value) {
-			apply(POST_SCAN_URL, value)
+			apply(SEND_SCAN_URL, value)
+			field = value
+		}
+	var sendScanType: String = "0"
+		set(value) {
+			apply(SEND_SCAN_TYPE, value)
+			field = value
+		}
+	var customLocale: String = ""
+		set(value) {
+			apply(CUSTOM_LOCALE, value)
 			field = value
 		}
 	var indexOfLastSelectedFormat: Int = 0
@@ -116,10 +145,18 @@ class Preferences {
 			CROP_HANDLE_ORIENTATION,
 			cropHandleOrientation
 		)
-		showCropHandle = preferences.getBoolean(SHOW_CROP_HANDLE, showCropHandle)
+		showCropHandle = preferences.getBoolean(
+			SHOW_CROP_HANDLE,
+			showCropHandle
+		)
 		zoomBySwiping = preferences.getBoolean(ZOOM_BY_SWIPING, zoomBySwiping)
 		autoRotate = preferences.getBoolean(AUTO_ROTATE, autoRotate)
 		tryHarder = preferences.getBoolean(TRY_HARDER, tryHarder)
+		bulkMode = preferences.getBoolean(BULK_MODE, bulkMode)
+		showToastInBulkMode = preferences.getBoolean(
+			SHOW_TOAST_IN_BULK_MODE,
+			showToastInBulkMode
+		)
 		vibrate = preferences.getBoolean(VIBRATE, vibrate)
 		useHistory = preferences.getBoolean(USE_HISTORY, useHistory)
 		ignoreConsecutiveDuplicates = preferences.getBoolean(
@@ -136,11 +173,21 @@ class Preferences {
 		)
 		showMetaData = preferences.getBoolean(SHOW_META_DATA, showMetaData)
 		showHexDump = preferences.getBoolean(SHOW_HEX_DUMP, showHexDump)
+		closeAutomatically = preferences.getBoolean(
+			CLOSE_AUTOMATICALLY,
+			closeAutomatically
+		)
 		preferences.getString(OPEN_WITH_URL, openWithUrl)?.also {
 			openWithUrl = it
 		}
-		preferences.getString(POST_SCAN_URL, sendScanUrl)?.also {
+		preferences.getString(SEND_SCAN_URL, sendScanUrl)?.also {
 			sendScanUrl = it
+		}
+		preferences.getString(SEND_SCAN_TYPE, sendScanType)?.also {
+			sendScanType = it
+		}
+		preferences.getString(CUSTOM_LOCALE, customLocale)?.also {
+			customLocale = it
 		}
 		indexOfLastSelectedFormat = preferences.getInt(
 			INDEX_OF_LAST_SELECTED_FORMAT,
@@ -176,15 +223,20 @@ class Preferences {
 		const val ZOOM_BY_SWIPING = "zoom_by_swiping"
 		const val AUTO_ROTATE = "auto_rotate"
 		const val TRY_HARDER = "try_harder"
+		const val BULK_MODE = "bulk_mode"
+		const val SHOW_TOAST_IN_BULK_MODE = "show_toast_in_bulk_mode"
 		const val VIBRATE = "vibrate"
 		const val USE_HISTORY = "use_history"
 		const val IGNORE_CONSECUTIVE_DUPLICATES = "ignore_consecutive_duplicates"
 		const val OPEN_IMMEDIATELY = "open_immediately"
 		const val COPY_IMMEDIATELY = "copy_immediately"
-		const val SHOW_HEX_DUMP = "show_hex_dump"
 		const val SHOW_META_DATA = "show_meta_data"
+		const val SHOW_HEX_DUMP = "show_hex_dump"
+		const val CLOSE_AUTOMATICALLY = "close_automatically"
 		const val OPEN_WITH_URL = "open_with_url"
-		const val POST_SCAN_URL = "post_scan_url"
+		const val SEND_SCAN_URL = "send_scan_url"
+		const val SEND_SCAN_TYPE = "send_scan_type"
+		const val CUSTOM_LOCALE = "custom_locale"
 		const val INDEX_OF_LAST_SELECTED_FORMAT = "index_of_last_selected_format"
 		const val FORCE_COMPAT = "force_compat"
 	}

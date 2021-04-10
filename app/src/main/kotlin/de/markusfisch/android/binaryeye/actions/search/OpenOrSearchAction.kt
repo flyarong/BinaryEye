@@ -5,9 +5,9 @@ import android.content.Intent
 import de.markusfisch.android.binaryeye.R
 import de.markusfisch.android.binaryeye.actions.IAction
 import de.markusfisch.android.binaryeye.app.alertDialog
-import de.markusfisch.android.binaryeye.app.execShareIntent
 import de.markusfisch.android.binaryeye.app.parseAndNormalizeUri
 import de.markusfisch.android.binaryeye.app.prefs
+import de.markusfisch.android.binaryeye.content.execShareIntent
 import de.markusfisch.android.binaryeye.widget.toast
 import java.net.URLEncoder
 
@@ -19,18 +19,26 @@ object OpenOrSearchAction : IAction {
 
 	override suspend fun execute(context: Context, data: ByteArray) {
 		val intent = openUri(context, String(data)) ?: return
-		execShareIntent(context, intent)
+		context.execShareIntent(intent)
 	}
 
-	private suspend fun openUri(context: Context, data: String, search: Boolean = true): Intent? {
+	private suspend fun openUri(
+		context: Context,
+		data: String,
+		search: Boolean = true
+	): Intent? {
 		val uri = parseAndNormalizeUri(data)
 		val intent = Intent(Intent.ACTION_VIEW, uri)
-		when {
-			intent.resolveActivity(context.packageManager) != null -> return intent
-			search -> return getSearchIntent(context, data)
-			else -> context.toast(R.string.cannot_resolve_action)
+		return when {
+			// It's okay to use `resolveActivity()` at API level 30+ here
+			// because ACTION_VIEW is defined in `<queries>` in the Manifest.
+			intent.resolveActivity(context.packageManager) != null -> intent
+			search -> getSearchIntent(context, data)
+			else -> {
+				context.toast(R.string.cannot_resolve_action)
+				null
+			}
 		}
-		return null
 	}
 
 	private suspend fun getSearchIntent(context: Context, query: String): Intent? {

@@ -21,12 +21,15 @@ import android.widget.ListView
 import de.markusfisch.android.binaryeye.R
 import de.markusfisch.android.binaryeye.adapter.ScansAdapter
 import de.markusfisch.android.binaryeye.app.*
+import de.markusfisch.android.binaryeye.content.copyToClipboard
+import de.markusfisch.android.binaryeye.content.shareText
 import de.markusfisch.android.binaryeye.database.Database
 import de.markusfisch.android.binaryeye.database.exportCsv
 import de.markusfisch.android.binaryeye.database.exportDatabase
 import de.markusfisch.android.binaryeye.database.exportJson
-import de.markusfisch.android.binaryeye.view.setPaddingFromWindowInsets
-import de.markusfisch.android.binaryeye.view.useVisibility
+import de.markusfisch.android.binaryeye.io.askForFileName
+import de.markusfisch.android.binaryeye.io.toSaveResult
+import de.markusfisch.android.binaryeye.view.*
 import de.markusfisch.android.binaryeye.widget.toast
 import kotlinx.coroutines.*
 
@@ -151,7 +154,7 @@ class HistoryFragment : Fragment() {
 			}
 			true
 		}
-		listView.setOnScrollListener(systemBarScrollListener)
+		listView.setOnScrollListener(systemBarListViewScrollListener)
 
 		fab = view.findViewById(R.id.share)
 		fab.setOnClickListener { v ->
@@ -357,41 +360,43 @@ class HistoryFragment : Fragment() {
 			.show()
 	}
 
-	private fun askToExportToFile(context: Context) = scope.launch {
-		val ac = activity ?: return@launch
-		progressView.useVisibility {
-			if (!hasWritePermission(ac)) {
-				return@useVisibility
-			}
-			val options = context.resources.getStringArray(
-				R.array.export_options_values
-			)
-			val delimiter = alertDialog<String>(context) { resume ->
-				setTitle(R.string.export_as)
-				setItems(R.array.export_options_names) { _, which ->
-					resume(options[which])
+	private fun askToExportToFile(context: Context) {
+		scope.launch {
+			val ac = activity ?: return@launch
+			progressView.useVisibility {
+				if (!hasWritePermission(ac) { askToExportToFile(context) }) {
+					return@useVisibility
 				}
-			} ?: return@useVisibility
-			val name = withContext(Dispatchers.Main) {
-				ac.askForFileName(
-					when (delimiter) {
-						"db" -> ".db"
-						"json" -> ".json"
-						else -> ".csv"
-					}
+				val options = context.resources.getStringArray(
+					R.array.export_options_values
 				)
-			} ?: return@useVisibility
-			val message = when (delimiter) {
-				"db" -> exportDatabase(ac, name)
-				else -> db.getScansDetailed(filter)?.use {
-					when (delimiter) {
-						"json" -> exportJson(context, name, it)
-						else -> exportCsv(context, name, it, delimiter)
+				val delimiter = alertDialog<String>(context) { resume ->
+					setTitle(R.string.export_as)
+					setItems(R.array.export_options_names) { _, which ->
+						resume(options[which])
 					}
-				} ?: false
-			}.toSaveResult()
-			withContext(Dispatchers.Main) {
-				ac.toast(message)
+				} ?: return@useVisibility
+				val name = withContext(Dispatchers.Main) {
+					ac.askForFileName(
+						when (delimiter) {
+							"db" -> ".db"
+							"json" -> ".json"
+							else -> ".csv"
+						}
+					)
+				} ?: return@useVisibility
+				val message = when (delimiter) {
+					"db" -> exportDatabase(ac, name)
+					else -> db.getScansDetailed(filter)?.use {
+						when (delimiter) {
+							"json" -> exportJson(context, name, it)
+							else -> exportCsv(context, name, it, delimiter)
+						}
+					} ?: false
+				}.toSaveResult()
+				withContext(Dispatchers.Main) {
+					ac.toast(message)
+				}
 			}
 		}
 	}

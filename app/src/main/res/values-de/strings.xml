@@ -11,6 +11,10 @@
 		<item quantity="other">%2$d Zeichen, %1$s</item>
 	</plurals>
 	<string name="error_correction_level">Fehlerkorrektur-Level</string>
+	<string name="error_correction_level_l" formatted="false">Low (~7&#37; wiederherstellbar)</string>
+	<string name="error_correction_level_m" formatted="false">Medium (~15&#37; wiederherstellbar)</string>
+	<string name="error_correction_level_q" formatted="false">Quartile (~25&#37; wiederherstellbar)</string>
+	<string name="error_correction_level_h" formatted="false">High (~30&#37; wiederherstellbar)</string>
 	<string name="issue_number">Ausgabe Nummer</string>
 	<string name="orientation">Orientierung</string>
 	<string name="other_meta_data">Metadaten</string>
@@ -20,6 +24,7 @@
 	<string name="upc_ean_extension">UPC EAN Erweiterung</string>
 	<string name="toggle_flash">Licht an/ausschalten</string>
 	<string name="share">Teilen</string>
+	<string name="share_as">Teilen als?</string>
 	<string name="copy_to_clipboard">In die Zwischenablage kopieren</string>
 	<string name="copied_to_clipboard">Inhalt wurde in die Zwischenablage kopiert</string>
 	<string name="copy_password">Passwort in die Zwischenablage kopieren</string>
@@ -38,21 +43,49 @@
 	<string name="info">Info</string>
 	<string name="switch_camera">Kamera wechseln</string>
 	<string name="bulk_mode">Fortlaufend Scannen</string>
+	<string name="bulk_mode_summary">Immer mit fortlaufendem Scannen starten.</string>
 	<string name="history">Gespeicherte Codes</string>
 	<string name="preferences">Einstellungen</string>
-	<string name="show_crop_handle">Bereich verkleinern anzeigen</string>
-	<string name="zoom_by_swiping">Hoch/Runter streichen um zu zoomen</string>
-	<string name="auto_rotate">Vertikale Erkennung von 1D Barcodes</string>
-	<string name="try_harder">Suche länger und gründlicher nach Barcodes</string>
+	<string name="scan_category">Scannen</string>
+	<string name="content_category">Inhalt</string>
+	<string name="locale_category">Sprache</string>
+	<string name="custom_locale">Spracheinstellung</string>
+	<string name="follow_system_settings">Systemeinstellung übernehmen</string>
+	<string name="show_crop_handle">Ausschnitt verkleinern anzeigen</string>
+	<string name="show_crop_handle_summary">Scannen auf einen anpassbaren Bereich einschränken.</string>
+	<string name="zoom_by_swiping">Geste für Kamerazoom</string>
+	<string name="zoom_by_swiping_summary">Im Kamerabildschirm nach oben oder unten streichen, um den Kamerazoom zu steuern.</string>
+	<string name="auto_rotate">Vertikale Erkennung</string>
+	<string name="auto_rotate_summary">Das Kamerabild automatisch drehen um vertikale 1D Barcodes zu erkennen. Je nach Gerät kann dies die Leistung beeinträchtigen.</string>
+	<string name="try_harder">Gründliche Suche</string>
+	<string name="try_harder_summary">Aktivieren Sie diese Option für sehr schwer lesbare Codes. Beeinträchtigt die Leistung.</string>
+	<string name="show_toast_in_bulk_mode">Daten einblenden</string>
+	<string name="show_toast_in_bulk_mode_summary">Die gescannten Daten werden kurz eingeblenet, wenn fortlaufend gescannt wird.</string>
 	<string name="vibrate">Bei Erkennung vibrieren</string>
+	<string name="vibrate_summary">Das Gerät soll vibrieren wenn ein Code erkannt wird.</string>
 	<string name="use_history">Codes speichern</string>
-	<string name="ignore_consecutive_duplicates">Keine aufeinanderfolgenden Duplikate speichern</string>
-	<string name="open_immediately">Inspektion überspringen und Inhalte sofort öffnen</string>
-	<string name="copy_immediately">Inhalte automatisch in Zwischenablage legen</string>
+	<string name="use_history_summary">Eingelesene Barcodes auf dem Gerät speichern.</string>
+	<string name="ignore_consecutive_duplicates">Duplikate ignorieren</string>
+	<string name="ignore_consecutive_duplicates_summary">Aufeinanderfolgende Duplikate werden nicht in der Scan-Historie gespeichert.</string>
+	<string name="open_immediately">Inhalte sofort öffnen</string>
+	<string name="open_immediately_summary">Inspektion überspringen und Inhalt sofort öffnen. Kann schädliche Inhalte öffnen, wenn aktiviert.</string>
+	<string name="copy_immediately">Automatisch in Zwischenablage</string>
+	<string name="copy_immediately_summary">Eingelesene Inhalte werden automatisch in die Zwischenablage kopiert. Bitte beachten Sie, dass andere Anwendungen die Zwischenablage im Hintergrund auslesen können.</string>
 	<string name="show_meta_data">Meta Daten anzeigen</string>
+	<string name="show_meta_data_summary">Zusätzliche Daten über den eingelesenen Barcode anzeigen.</string>
 	<string name="show_hex_dump">Hex Dump anzeigen</string>
+	<string name="show_hex_dump_summary">Zeigt einen Hexdump des eingelesenen Inhalts an.</string>
+	<string name="close_automatically">Automatisch zurückkehren</string>
+	<string name="close_automatically_summary">Nach dem Kopieren/Teilen automatisch zum Scanbildschirm zurückkehren.</string>
 	<string name="open_with_url">URL zum Öffnen unbekannter Daten</string>
+	<string name="send_category">Weiterleitung</string>
 	<string name="send_scan_url">URL die für jeden Scan aufgerufen werden soll</string>
+	<string name="send_scan_type">Typ des Requests für jeden Scan</string>
+	<string name="send_type_get_add_content">GET mit an die URL angehängtem Inhalt</string>
+	<string name="send_type_get_query_string">GET mit vollständigem Query-String</string>
+	<string name="send_type_post_form">POST application/x-www-form-urlencoded</string>
+	<string name="send_type_post_json">POST application/json</string>
+	<string name="test_url">Test URL</string>
 	<string name="really_remove_scan">Code wirklich entfernen?</string>
 	<string name="really_remove_all_scans">Alle Codes entfernen?</string>
 	<string name="really_remove_selected_scans">Alle ausgewählten Codes entfernen?</string>
@@ -87,18 +120,17 @@
 	<string name="search_web">Suche im Internet</string>
 	<string name="search_scan">Code suchen</string>
 	<string name="export_to_file">In Datei exportieren</string>
-	<string name="export_png">Als PNG exportieren</string>
-	<string name="export_svg">Als SVG exportieren</string>
 	<string name="export_as">Exportieren als?</string>
-	<string name="export_csv_comma">CSV mit Kommas</string>
-	<string name="export_csv_semicolon">CSV mit Semikolons</string>
-	<string name="export_json">Als JSON exportieren</string>
-	<string name="export_database">SQLite Datenbank exportieren</string>
+	<string name="export_csv_comma">CSV Datei mit Kommas</string>
+	<string name="export_csv_semicolon">CSV Datei mit Semikolons</string>
+	<string name="export_json">JSON Datei</string>
+	<string name="export_database">SQLite Datenbank</string>
 	<string name="saved_in_downloads">In den Downloads gespeichert</string>
 	<string name="rotate_image_cw">Bild im Uhrzeigersinn rotieren</string>
 	<string name="pick_file">Bilddatei auswählen</string>
 	<string name="pick_code_to_scan">Code im Bild auswählen</string>
-	<string name="shortcut_decode">Barcode einlesen</string>
+	<string name="shortcut_decode">Barcode lesen</string>
 	<string name="shortcut_encode">Barcode erstellen</string>
 	<string name="shortcut_preferences">Einstellungen</string>
+	<string name="background_request_failed">Hintergrundanfrage fehlgeschlagen</string>
 </resources>

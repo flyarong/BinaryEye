@@ -7,6 +7,8 @@ import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.graphics.RectF
 import android.hardware.Camera
+import android.media.AudioManager
+import android.media.ToneGenerator
 import android.net.Uri
 import android.os.Bundle
 import android.os.Vibrator
@@ -14,6 +16,7 @@ import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.support.v8.renderscript.RSRuntimeException
+import android.support.v8.renderscript.RenderScript
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
@@ -21,15 +24,19 @@ import android.view.View
 import android.widget.SeekBar
 import com.google.zxing.Result
 import com.google.zxing.ResultMetadataType
-import com.google.zxing.ResultPointCallback
 import de.markusfisch.android.binaryeye.R
 import de.markusfisch.android.binaryeye.app.*
+import de.markusfisch.android.binaryeye.content.copyToClipboard
+import de.markusfisch.android.binaryeye.content.execShareIntent
 import de.markusfisch.android.binaryeye.database.Scan
 import de.markusfisch.android.binaryeye.graphics.Mapping
 import de.markusfisch.android.binaryeye.graphics.frameToView
 import de.markusfisch.android.binaryeye.graphics.isPortrait
-import de.markusfisch.android.binaryeye.net.send
+import de.markusfisch.android.binaryeye.net.sendAsync
+import de.markusfisch.android.binaryeye.os.error
+import de.markusfisch.android.binaryeye.os.vibrate
 import de.markusfisch.android.binaryeye.rs.Preprocessor
+import de.markusfisch.android.binaryeye.view.initSystemBars
 import de.markusfisch.android.binaryeye.view.setPaddingFromWindowInsets
 import de.markusfisch.android.binaryeye.widget.DetectorView
 import de.markusfisch.android.binaryeye.widget.toast
@@ -40,7 +47,7 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 
 class CameraActivity : AppCompatActivity() {
-	private val zxing = Zxing(ResultPointCallback { point ->
+	private val zxing = Zxing { point ->
 		point?.let {
 			getMapping()?.map(it)?.let {
 				detectorView.post {
@@ -48,8 +55,9 @@ class CameraActivity : AppCompatActivity() {
 				}
 			}
 		}
-	})
+	}
 
+	private lateinit var rs: RenderScript
 	private lateinit var vibrator: Vibrator
 	private lateinit var cameraView: CameraView
 	private lateinit var detectorView: DetectorView
@@ -66,7 +74,7 @@ class CameraActivity : AppCompatActivity() {
 	private var decoding = true
 	private var returnResult = false
 	private var frontFacing = false
-	private var bulkMode = false
+	private var bulkMode = prefs.bulkMode
 	private var ignoreNext: String? = null
 	private var fallbackBuffer: IntArray? = null
 
@@ -102,10 +110,19 @@ class CameraActivity : AppCompatActivity() {
 		}
 	}
 
+	override fun attachBaseContext(base: Context?) {
+		base?.applyLocale(prefs.customLocale)
+		super.attachBaseContext(base)
+	}
+
 	override fun onCreate(state: Bundle?) {
 		super.onCreate(state)
 		setContentView(R.layout.activity_camera)
 
+		// necessary to get the right translation after setting a custom locale
+		setTitle(R.string.scan_code)
+
+		rs = RenderScript.create(this)
 		vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
 		initSystemBars(this)
@@ -133,12 +150,18 @@ class CameraActivity : AppCompatActivity() {
 		fallbackBuffer = null
 		saveZoom()
 		saveCropHandlePos()
+		rs.destroy()
 	}
 
 	override fun onResume() {
 		super.onResume()
 		System.gc()
 		zxing.updateHints(prefs.tryHarder)
+		if (prefs.bulkMode && bulkMode != prefs.bulkMode) {
+			bulkMode = prefs.bulkMode
+			invalidateOptionsMenu()
+			ignoreNext = null
+		}
 		returnResult = "com.google.zxing.client.android.SCAN" == intent.action
 		if (hasCameraPermission(this)) {
 			openCamera()
@@ -234,6 +257,7 @@ class CameraActivity : AppCompatActivity() {
 			R.id.bulk_mode -> {
 				bulkMode = bulkMode xor true
 				item.isChecked = bulkMode
+				ignoreNext = null
 				true
 			}
 			R.id.preferences -> {
@@ -263,11 +287,7 @@ class CameraActivity : AppCompatActivity() {
 			Intent.ACTION_VIEW,
 			Uri.parse(getString(R.string.project_url))
 		)
-		if (intent.resolveActivity(packageManager) != null) {
-			startActivity(intent)
-		} else {
-			toast(R.string.project_url)
-		}
+		execShareIntent(intent)
 	}
 
 	private fun handleSendText(intent: Intent) {
@@ -554,7 +574,7 @@ class CameraActivity : AppCompatActivity() {
 			frameOrientation
 		)
 		val pp = Preprocessor(
-			this,
+			rs,
 			frameWidth,
 			frameHeight,
 			frameRoi
@@ -645,12 +665,15 @@ class CameraActivity : AppCompatActivity() {
 			showResult(
 				this@CameraActivity,
 				result,
+				vibrator,
 				returnResult,
 				bulkMode
 			)
 			if (bulkMode) {
 				ignoreNext = result.text
-				toast(result.text)
+				if (prefs.showToastInBulkMode) {
+					toast(result.text)
+				}
 				detectorView.postDelayed({
 					decoding = true
 				}, 500)
@@ -672,8 +695,9 @@ class CameraActivity : AppCompatActivity() {
 fun showResult(
 	activity: Activity,
 	result: Result,
+	vibrator: Vibrator,
 	isResult: Boolean = false,
-	bulkMode: Boolean = false
+	bulkMode: Boolean = false,
 ) {
 	if (isResult) {
 		activity.setResult(Activity.RESULT_OK, getReturnIntent(result))
@@ -684,8 +708,21 @@ fun showResult(
 		activity.copyToClipboard(result.text)
 	}
 	val scan = Scan(result)
-	prefs.sendScanUrl?.let {
-		scan.send(it)
+	if (prefs.sendScanUrl.isNotEmpty()) {
+		scan.sendAsync(
+			prefs.sendScanUrl,
+			prefs.sendScanType
+		) { code, body ->
+			if (code == null || code < 200 || code > 299) {
+				vibrator.error()
+				beepBeepBeep()
+			}
+			if (body != null && body.isNotEmpty()) {
+				activity.toast(body)
+			} else if (code == null || code > 299) {
+				activity.toast(R.string.background_request_failed)
+			}
+		}
 	}
 	if (prefs.useHistory) {
 		scan.id = db.insertScan(scan)
@@ -736,4 +773,11 @@ fun getReturnIntent(result: Result): Intent {
 		}
 	}
 	return intent
+}
+
+private fun beepBeepBeep() {
+	ToneGenerator(AudioManager.STREAM_ALARM, 100).startTone(
+		ToneGenerator.TONE_CDMA_CONFIRM,
+		1000
+	)
 }

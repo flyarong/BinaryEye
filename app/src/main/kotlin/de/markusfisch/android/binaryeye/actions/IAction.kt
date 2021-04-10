@@ -2,8 +2,8 @@ package de.markusfisch.android.binaryeye.actions
 
 import android.content.Context
 import android.content.Intent
-import de.markusfisch.android.binaryeye.app.execShareIntent
 import de.markusfisch.android.binaryeye.app.parseAndNormalizeUri
+import de.markusfisch.android.binaryeye.content.execShareIntent
 import de.markusfisch.android.binaryeye.widget.toast
 
 interface IAction {
@@ -21,7 +21,7 @@ abstract class IntentAction : IAction {
 		val intent = createIntent(context, data) ?: return context.toast(
 			errorMsg
 		)
-		execShareIntent(context, intent)
+		context.execShareIntent(intent)
 	}
 
 	abstract suspend fun createIntent(context: Context, data: ByteArray): Intent?
@@ -43,6 +43,6 @@ abstract class SchemeAction : IAction {
 
 	final override suspend fun execute(context: Context, data: ByteArray) {
 		val uri = parseAndNormalizeUri(String(data))
-		execShareIntent(context, Intent(intentAction, uri))
+		context.execShareIntent(Intent(intentAction, uri))
 	}
 }

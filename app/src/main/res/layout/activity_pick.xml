@@ -4,6 +4,10 @@
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:contentDescription="@string/view_barcode"/>
+	<de.markusfisch.android.binaryeye.widget.DetectorView
+		android:id="@+id/detector_view"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"/>
 	<android.support.design.widget.CoordinatorLayout
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
@@ -13,6 +17,6 @@
 			style="@style/FAB"
 			android:id="@+id/scan"
 			android:contentDescription="@string/scan_code"
-			android:src="@drawable/ic_action_scan"/>
+			android:src="@drawable/ic_action_search"/>
 	</android.support.design.widget.CoordinatorLayout>
 </merge>

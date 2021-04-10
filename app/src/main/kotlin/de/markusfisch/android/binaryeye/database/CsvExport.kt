@@ -3,7 +3,7 @@ package de.markusfisch.android.binaryeye.database
 import android.content.Context
 import android.database.Cursor
 import de.markusfisch.android.binaryeye.app.toHexString
-import de.markusfisch.android.binaryeye.app.writeExternalFile
+import de.markusfisch.android.binaryeye.io.writeExternalFile
 import java.io.ByteArrayOutputStream
 import java.io.OutputStream
 
@@ -87,6 +87,8 @@ private fun Cursor.toCsvRecord(
 	return sb.toString().toByteArray()
 }
 
-private fun String.quoteAndEscape() = "\"${this
-	.replace("\n", " ")
-	.replace("\"", "\"\"")}\""
+private fun String.quoteAndEscape() = "\"${
+	this
+		.replace("\n", " ")
+		.replace("\"", "\"\"")
+}\""

@@ -4,13 +4,19 @@ import android.content.Context
 import android.widget.Toast
 
 fun Context.toast(message: Int) = Toast.makeText(
-	this,
+	applicationContext,
 	message,
 	Toast.LENGTH_LONG
 ).show()
 
 fun Context.toast(message: String) = Toast.makeText(
-	this,
-	message,
+	applicationContext,
+	message.ellipsize(128),
 	Toast.LENGTH_LONG
 ).show()
+
+private fun String.ellipsize(max: Int) = if (length < max) {
+	this
+} else {
+	"${take(max)}…"
+}

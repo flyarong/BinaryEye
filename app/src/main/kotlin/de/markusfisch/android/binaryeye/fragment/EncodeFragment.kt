@@ -2,17 +2,25 @@ package de.markusfisch.android.binaryeye.fragment
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import de.markusfisch.android.binaryeye.R
+import de.markusfisch.android.binaryeye.adapter.prettifyFormatName
 import de.markusfisch.android.binaryeye.app.addFragment
-import de.markusfisch.android.binaryeye.app.hideSoftKeyboard
 import de.markusfisch.android.binaryeye.app.prefs
+import de.markusfisch.android.binaryeye.view.hideSoftKeyboard
 import de.markusfisch.android.binaryeye.view.setPaddingFromWindowInsets
+import java.util.*
 
 class EncodeFragment : Fragment() {
 	private lateinit var formatView: Spinner
+	private lateinit var errorCorrectionLabel: TextView
+	private lateinit var errorCorrectionLevel: Spinner
 	private lateinit var sizeView: TextView
 	private lateinit var sizeBarView: SeekBar
 	private lateinit var contentView: EditText
@@ -46,11 +54,38 @@ class EncodeFragment : Fragment() {
 		)
 
 		formatView = view.findViewById(R.id.format)
-		formatView.adapter = ArrayAdapter(
+		val formatAdapter = ArrayAdapter(
 			ac,
-			android.R.layout.simple_list_item_1,
-			writers.map { it.name }
+			android.R.layout.simple_spinner_item,
+			writers.map { prettifyFormatName(it.name) }
 		)
+		formatAdapter.setDropDownViewResource(
+			android.R.layout.simple_spinner_dropdown_item
+		)
+		formatView.adapter = formatAdapter
+		formatView.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+			override fun onItemSelected(
+				parentView: AdapterView<*>?,
+				selectedItemView: View?,
+				position: Int,
+				id: Long
+			) {
+				val visibility = if (
+					writers[position] == BarcodeFormat.QR_CODE
+				) {
+					View.VISIBLE
+				} else {
+					View.GONE
+				}
+				errorCorrectionLabel.visibility = visibility
+				errorCorrectionLevel.visibility = visibility
+			}
+
+			override fun onNothingSelected(parentView: AdapterView<*>?) {}
+		}
+
+		errorCorrectionLabel = view.findViewById(R.id.error_correction_label)
+		errorCorrectionLevel = view.findViewById(R.id.error_correction_level)
 
 		sizeView = view.findViewById(R.id.size_display)
 		sizeBarView = view.findViewById(R.id.size_bar)
@@ -90,7 +125,16 @@ class EncodeFragment : Fragment() {
 	}
 
 	private fun encode() {
+		val hints = EnumMap<EncodeHintType, Any>(EncodeHintType::class.java)
 		val format = writers[formatView.selectedItemPosition]
+		if (format == BarcodeFormat.QR_CODE) {
+			hints[EncodeHintType.ERROR_CORRECTION] = arrayListOf(
+				ErrorCorrectionLevel.L,
+				ErrorCorrectionLevel.M,
+				ErrorCorrectionLevel.Q,
+				ErrorCorrectionLevel.H
+			)[errorCorrectionLevel.selectedItemPosition]
+		}
 		val size = getSize(sizeBarView.progress)
 		val content = contentView.text.toString()
 		if (content.isEmpty()) {
@@ -103,7 +147,7 @@ class EncodeFragment : Fragment() {
 			activity?.hideSoftKeyboard(contentView)
 			addFragment(
 				fragmentManager,
-				BarcodeFragment.newInstance(content, format, size)
+				BarcodeFragment.newInstance(content, format, size, hints)
 			)
 		}
 	}
